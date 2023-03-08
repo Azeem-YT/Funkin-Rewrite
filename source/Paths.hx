@@ -186,7 +186,7 @@ class Paths
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), packerTxt(key, library'));
 
 	inline static public function getSparrowAtlas(key:String, ?library:String = '')
-		return FlxAtlasFrames.fromSparrow(image(key, library), sparrowXml('images/$key.xml', library))
+		return FlxAtlasFrames.fromSparrow(image(key, library), sparrowXml('images/$key.xml', library));
 
 	inline static public function packerTxt(key:String, ?library:String = ''):Any {
 		if (FileSystem.exists(mods('images/$key.txt')))
@@ -235,7 +235,7 @@ class Paths
 	}
 
 	inline static public function destroyImages() {
-		if (!GameChanges.persistentCache) {
+		if (!PlayerPrefs.persistentCache) {
 			for (image in moddedGraphicsLoaded.keys()) {
 				var graphic:FlxGraphic = FlxG.bitmap.get(image);
 				if (graphic != null) {
