@@ -10,7 +10,8 @@ import sys.io.File;
 import sys.FileSystem;
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
-import flash.media.Sound; 
+import flash.media.Sound;
+import data.*;
 
 class Paths
 {
@@ -24,7 +25,7 @@ class Paths
 	inline static public function getAssetDirectory(key:String, ?library:String = '') {
 
 		if (library != null)
-			return getPreloadPath(key, library);
+			return getLibraryPath(key, library);
 
 		return getPreloadPath(key);
 	}
@@ -136,6 +137,19 @@ class Paths
 	inline static public function soundAsset(key:String, ?library)
 		return getAssetDirectory('sounds/$key.ogg', library);
 
+	inline static public function characterFile(char:String, ?isPlayer:Bool = false) {
+		if (isPlayer && FileSystem.exists(mods('characters/$char-player.json')))
+			return mods('characters/$char-player.json');
+
+		if (FileSystem.exists(mods('characters/$char.json')))
+			return mods('characters/$char.json');
+
+		if (isPlayer && Assets.exists(getAssetDirectory('characters/$char-player.json')))
+			return getAssetDirectory('characters/$char-player.json');
+
+		return getAssetDirectory('characters/$char.json');
+	}
+
 	inline static public function inst(song:String):Any {
 		song = song.toLowerCase();
 
@@ -176,23 +190,26 @@ class Paths
 
 	inline static public function font(key:String)
 	{
-		if (FileSystem.exists(modFonts('fonts/$key')))
-			return modFonts('fonts/$key');
+		if (FileSystem.exists(modFonts('$key')))
+			return modFonts('$key');
 		else
-			getAssetDirectory('$key', 'fonts');
+			getAssetDirectory('$key');
 	}
 
 	inline static public function getPackerAtlas(key:String, ?library:String = '')
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), packerTxt(key, library'));
 
 	inline static public function getSparrowAtlas(key:String, ?library:String = '')
-		return FlxAtlasFrames.fromSparrow(image(key, library), sparrowXml('images/$key.xml', library))
+		return FlxAtlasFrames.fromSparrow(image(key, library), sparrowXml('images/$key.xml', library));
 
 	inline static public function packerTxt(key:String, ?library:String = ''):Any {
 		if (FileSystem.exists(mods('images/$key.txt')))
-			return mods('images/$key.txt');
+			return File.getContent(mods('images/$key.txt'));
 
-		return Assets.getText(getAssetDirectory('images/$key.txt', library));
+		if (Assets.exists(getAssetDirectory('images/$key.txt', library))
+			return Assets.getText(getAssetDirectory('images/$key.txt', library));
+
+		return getAssetDirectory('images/$key.txt', library);
 	}
 
 	inline static public function sparrowXml(key:String, ?library:String = ''):Any {
@@ -201,7 +218,10 @@ class Paths
 		if (FileSystem.exists(mods('images/$key.xml')))
 			return File.getContent('images/$key.xml');
 
-		return Assets.getText(assetPath);
+		if (Assets.exists(assetPath))
+			return Assets.getText(assetPath);
+
+		return assetPath;
 	}
 
 	inline static public function getImage(key:String, ?library:String = ''):FlxGraphic
