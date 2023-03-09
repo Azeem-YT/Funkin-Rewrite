@@ -7,14 +7,14 @@ Play original game on Newgrounds here: https://www.newgrounds.com/portal/view/77
 
 This game was made with love to Newgrounds and its community. Extra love to Tom Fulp.
 
-## Compiling from source
+# Compiling from source
 Follow these steps if you wanna compile the game from source:
 
 - Install [Haxe](https://haxe.org/download/version/4.2.4/)
 - Install [HaxeFlixel 4.2.4](https://haxeflixel.com/documentation/install-haxeflixel/) after downloading Haxe
 - Install [Git](https://git-scm.com/downloads)
 
-**Installing HaxeFlixel**
+## Installing HaxeFlixel
 Open Command Prompt.
 To Install HaxeFlixel, Type this into your Command Prompt
 ```
@@ -23,7 +23,7 @@ haxelib install openfl
 haxelib install flixel
 ```
 
-**Installing The Libraries**
+## Installing The Libraries
 You will now have to Install additional libraries by running these commands in the command prompt.
 ```
 haxelib install flixel-tools
@@ -39,7 +39,7 @@ haxelib install HxShaders
 ```
 
 # Compiling The Game
-- If you see any messages relating to deprecated packages, ignore them. They're just warnings that don't affect compiling
+## If you see any messages relating to deprecated packages, ignore them. They're just warnings that don't affect compiling
 
 ## HTML5
 All you need to do is run the command `lime test html5` wherever the project.xml file is and run the HTML5 version.
