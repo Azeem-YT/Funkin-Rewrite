@@ -25,16 +25,18 @@ haxelib install flixel
 
 **Installing The Libraries**
 You will now have to Install additional libraries by running these commands in the command prompt.
-	- `haxelib install flixel-tools`
-	- `haxelib install flixel-ui`
-	- `haxelib install hscript`
-	- `haxelib install flixel-addons`
-	- `haxelib run lime setup`
-	- `haxelib run lime setup flixel`
-	- `haxelib run flixel-tools setup`
-	- `haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit.git`
-	- `haxelib install hxCodec`
-	- `haxelib install HxShaders`
+```
+haxelib install flixel-tools
+haxelib install flixel-ui
+haxelib install hscript
+haxelib install flixel-addons
+haxelib run lime setup
+haxelib run lime setup flixel
+haxelib run flixel-tools setup
+haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit.git
+haxelib install hxCodec
+haxelib install HxShaders
+```
 
 # Compiling The Game
 - If you see any messages relating to deprecated packages, ignore them. They're just warnings that don't affect compiling
