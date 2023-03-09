@@ -5,8 +5,6 @@
 Find the original version here: https://github.com/FunkinCrew/Funkin
 Play original game on Newgrounds here: https://www.newgrounds.com/portal/view/770371
 
-This game was made with love to Newgrounds and its community. Extra love to Tom Fulp.
-
 # Compiling from source
 Follow these steps if you wanna compile the game from source:
 
