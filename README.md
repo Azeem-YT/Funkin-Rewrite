@@ -72,7 +72,7 @@ This will install about 4-5 GB of crap, but is necessary to build for Windows.
 
 
 ## Credits
-# ---------------Engine--------------------
+# ----------------Engine--------------------
 - Azeem - The only one working on this lol
 # -------------Funkin Crew---------------
 - [ninjamuffin99](https://twitter.com/ninja_muffin99) - Programmer
