@@ -1,0 +1,93 @@
+{
+  "framesPath": "characters/tankmanCaptain",
+  "flipX": true,
+  "healthIcon": "icon-tankman",
+  "camOffset": [
+    0,
+    0
+  ],
+  "positionOffset": [
+    0,
+    200
+  ],
+  "animations": [
+    {
+      "prefix": "idle",
+      "anim": "Tankman Idle Dance",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "prefix": "singUP",
+      "anim": "Tankman UP note 1",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        24,
+        56
+      ]
+    },
+    {
+      "prefix": "singLEFT",
+      "anim": "Tankman Right Note 1",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        100,
+        -14
+      ]
+    },
+    {
+      "prefix": "singRIGHT",
+      "anim": "Tankman Note Left 1",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -1,
+        -7
+      ]
+    },
+    {
+      "prefix": "singDOWN",
+      "anim": "Tankman DOWN note 1",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        98,
+        -90
+      ]
+    },
+    {
+      "prefix": "singDOWN-alt",
+      "anim": "PRETTY GOOD",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "prefix": "singUP-alt",
+      "anim": "TANKMAN UGH",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
+    }
+  ],
+  "healthColors": [ 0, 0, 0 ]
+}

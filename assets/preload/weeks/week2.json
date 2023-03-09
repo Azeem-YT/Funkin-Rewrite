@@ -1,0 +1,11 @@
+{
+  "songs": [
+    "Spookeez",
+    "South",
+    "Monster"
+  ],
+  "weekName": "Spooky Month",
+  "weekImg": "week2",
+  "startUnlocked": true,
+  "menuChars": ["spooky", "bf", "gf" ]
+}

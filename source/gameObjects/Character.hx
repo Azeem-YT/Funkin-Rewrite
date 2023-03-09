@@ -1,4 +1,4 @@
-package;
+package gameObjects;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -7,13 +7,18 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxSort;
 import flixel.graphics.frames.FlxFrame;
-import Section.SwagSection;
 import sys.io.File;
 import sys.FileSystem;
 import helpers.*;
 import openfl.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
+import data.Section.SwagSection;
+import data.Conductor;
+import data.Song;
+import states.*;
+import data.PlayerPrefs;
+import flixel.group.FlxSpriteGroup;
 
 using StringTools;
 
@@ -29,13 +34,6 @@ typedef CharData =
 	var positionOffset:Array<Float>;
 	var healthColors:Array<Int>;
 	var image:String; //If porting from psych engine
-	var iconAnims:Array<String>;
-	var iconIsLooped:Bool;
-	var iconScale:Float;
-	var portraitFrames:String;
-	var portraitEnter:String;
-	var portraitAnims:Array<PortraitData>;
-	var portraitScale:Float;
 	var deathCharacter:String;
 	var deathSound:String;
 	var noAntialiasing:Bool;
@@ -74,7 +72,10 @@ class Character extends EngineSprite
 	public var idleOnBeat:Int = 2;
 	public var singDuration:Float = 4;
 
+	public var danced:Bool = false;
+
 	public var usedOnStrum:Bool = false;
+	public var danceIdle:Bool = false;
 
 	public var healthIcon:String;
 
@@ -83,9 +84,13 @@ class Character extends EngineSprite
 	public var deathCharacter:String = 'bf';
 	public var deathSound:String = null;
 
+	public var ghostGroup:FlxSpriteGroup;
+
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
 	{
 		super(x, y);
+
+		ghostGroup = new FlxSpriteGroup(0, 0);
 
 		curCharacter = character;
 		this.isPlayer = isPlayer;
@@ -147,39 +152,34 @@ class Character extends EngineSprite
 					path = Paths.characterFile(curCharacter, isPlayer);
 				}
 
-				data = Json.parse(File.getContent(path));
+				charData = Json.parse(File.getContent(path));
 
-				switch (data.atlasType) {
+				switch (charData.atlasType) {
 					case 'packer':
-						frames = Paths.getPackerAtlas(data.image);
+						frames = Paths.getPackerAtlas(charData.image);
 					case 'sparrow':
-						frames = Paths.getSparrowAtlas(data.image);
+						frames = Paths.getSparrowAtlas(charData.image);
 					default:
-						frames = Paths.getSparrowAtlas(data.image);
+						frames = Paths.getSparrowAtlas(charData.image);
 				}
 
-				if (data.camOffset != null && data.camOffset.length > 0)
-					camOffset = data.camOffset;
+				if (charData.camOffset != null && charData.camOffset.length > 0)
+					camOffset = charData.camOffset;
 					
-				if (data.playerOffset != null && data.playerOffset.length > 0)
-					playerOffset = data.playerOffset;
-
-				healthIcon = (data.healthIcon != null && data.healthIcon != '' ? data.healthIcon : 'face');
+				healthIcon = (charData.healthIcon != null && charData.healthIcon != '' ? charData.healthIcon : 'face');
 				
-				portraitArray = data.portraitAnims;
-
 				if (frames != null) {
-					animArray = data.animations;
+					animArray = charData.animations;
 
-					positionOffset = data.positionOffset;
+					positionOffset = charData.positionOffset;
 
 					if (animArray != null && animArray.length > 0) {
 						for (anim in animArray) {
 							if (anim.anim != null && anim.anim != "") {
 								if (anim.indices != null && anim.indices.length > 0)
-									animation.addByIndices(anim.anim, anim.prefix, anim.indices, "", anim.fps, anim.loop, data.flipX);
+									animation.addByIndices(anim.anim, anim.prefix, anim.indices, "", anim.fps, anim.loop, charData.flipX);
 								else
-									animation.addByPrefix(anim.anim, anim.prefix, anim.fps, anim.loop, data.flipX);
+									animation.addByPrefix(anim.anim, anim.prefix, anim.fps, anim.loop, charData.flipX);
 
 								if (anim.offset != null)
 									addOffset(anim.prefix, anim.offset[0], anim.offset[1]);
@@ -189,27 +189,27 @@ class Character extends EngineSprite
 						}
 					}
 
-					if (data.scale != 1)
-						setGraphicSize(Std.int(width * data.scale));
+					if (charData.scale != 1)
+						setGraphicSize(Std.int(width * charData.scale));
 
-					if (data.deathCharacter != null)
-						deathCharacter = data.deathCharacter;
+					if (charData.deathCharacter != null)
+						deathCharacter = charData.deathCharacter;
 
-					if (data.deathSound != null)
-						deathSound = data.deathSound;
+					if (charData.deathSound != null)
+						deathSound = charData.deathSound;
 
-					if (data.noAntialiasing)
+					if (charData.noAntialiasing)
 						antialiasing = false;
 					else
 						antialiasing = true;
 
-					idleOnBeat = data.idleOnBeat;
+					idleOnBeat = charData.idleOnBeat;
 
-					if (data.healthColors != null && data.healthColors.length == 3)
-						healthColors = data.healthColors;
+					if (charData.healthColors != null && charData.healthColors.length == 3)
+						healthColors = charData.healthColors;
 
-					if (data.sing_duration != null)
-						singDuration = data.sing_duration;
+					if (charData.sing_duration != null)
+						singDuration = charData.sing_duration;
 				}
 				else {
 					frames = Paths.getSparrowAtlas('characters/BOYFRIEND');
@@ -259,6 +259,7 @@ class Character extends EngineSprite
 		updateHitbox();
 	}
 
+	/*
 	public function loadOffsetFile(character:String) {
 		var offset:Array<String> = CoolUtil.coolTextFile(Paths.txt('offsets/' + character + "Offsets"));
 
@@ -266,7 +267,7 @@ class Character extends EngineSprite
 			var data:Array<String> = offset[i].split(' ');
 			addOffset(data[0], Std.parseInt(data[1]), Std.parseInt(data[2]));
 		}
-	}
+	} */
 
 	override function update(elapsed:Float)
 	{
@@ -325,12 +326,12 @@ class Character extends EngineSprite
 					playAnim('danceRight');
 			case 'tankman':
 				if ((animation.curAnim.name == 'singDOWN-alt' || animation.curAnim.name == 'singUP-alt') && !animation.curAnim.finished && animation.curAnim != null)
-					canIdle = false;
+					forceNoIdle = false;
 		}
 
 		if (animation.curAnim != null) {
-			if (animation.curAnim.finished && !canIdle)
-				canIdle = true;
+			if (animation.curAnim.finished && !forceNoIdle)
+				forceNoIdle = true;
 		}
 
 		super.update(elapsed);
@@ -382,7 +383,7 @@ class Character extends EngineSprite
 		heyTimer = 0.20;
 	}
 
-	override public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0)
+	override public function playAnim(AnimName:String, Forced:Bool = false, Reversed:Bool = false, Frame:Int = 0)
 	{
 		super.playAnim(AnimName, Forced, Reversed, Frame);
 
@@ -422,7 +423,6 @@ class Character extends EngineSprite
 		camOffset = [0,0];
 		animationNotes = [];
 		positionOffset = [0, 0];
-		playerOffset = [0, 0];
 		deathCharacter = 'bf';
 		deathSound = null;
 		idleDance = 'idle';

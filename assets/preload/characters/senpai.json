@@ -1,0 +1,77 @@
+{
+  "animations": [
+    {
+      "offset": [
+        1,
+        0
+      ],
+      "loop": false,
+      "prefix": "idle",
+      "fps": 24,
+      "anim": "Senpai Idle",
+      "indices": []
+    },
+    {
+      "offset": [
+        5,
+        37
+      ],
+      "loop": false,
+      "fps": 24,
+      "prefix": "singUP",
+      "indices": [],
+      "anim": "SENPAI UP NOTE"
+    },
+    {
+      "offset": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "prefix": "singRIGHT",
+      "indices": [],
+      "anim": "SENPAI RIGHT NOTE"
+    },
+    {
+      "offset": [
+        40,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "prefix": "singLEFT",
+      "indices": [],
+      "anim": "SENPAI LEFT NOTE"
+    },
+    {
+      "offset": [
+        14,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "prefix": "singDOWN",
+      "indices": [],
+      "anim": "SENPAI DOWN NOTE"
+    }
+  ],
+  "noAntialiasing": true,
+  "framesPath": "characters/senpai",
+  "positionOffset": [
+    200,
+    360
+  ],
+  "healthIcon": "icon-senpai",
+  "flipX": false,
+  "healthColors": [
+    255,
+    170,
+    111
+  ],
+  "camOffset": [
+    -205,
+    -330
+  ],
+  "scale": 6
+}

@@ -20,24 +20,29 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
-import io.newgrounds.NG;
 import lime.app.Application;
 import openfl.Assets;
 import haxe.Http;
 import data.*;
-import gameObjects*;
+import gameObjects.*;
+
+using StringTools;
 
 class TitleState extends MusicBeatState
 {
 	public var gfDance:EngineSprite;
 	public var enterSprite:EngineSprite;
 	public var logoSprite:EngineSprite;
+	public var blackScreen:FlxSprite;
 
 	var credGroup:FlxGroup;
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var ngSpr:EngineSprite;
 	var versionsMatch:Bool = true;
+	var initialized:Bool = false;
+	var skippedIntro:Bool = false;
+	var danceLeft:Bool = false;
 
 	var curWacky:Array<String> = [];
 
@@ -49,7 +54,7 @@ class TitleState extends MusicBeatState
 
 		FlxG.save.bind('funkin', 'ninjamuffin99');
 
-		PlayerController.init();
+		PlayerSettings.init();
 		PlayerPrefs.resetPrefs();
 
 		Main.getFPSCounter();
@@ -107,12 +112,12 @@ class TitleState extends MusicBeatState
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		add(bg);
 
-		logoBl = new EngineSprite(-150, -100);
-		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
-		logoBl.antialiasing = true;
-		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
-		logoBl.animation.play('bump');
-		logoBl.updateHitbox();
+		logoSprite = new EngineSprite(-150, -100);
+		logoSprite.frames = Paths.getSparrowAtlas('logoBumpin');
+		logoSprite.antialiasing = true;
+		logoSprite.animation.addByPrefix('bump', 'logo bumpin', 24);
+		logoSprite.animation.play('bump');
+		logoSprite.updateHitbox();
 
 		gfDance = new EngineSprite(FlxG.width * 0.4, FlxG.height * 0.07);
 		gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
@@ -120,7 +125,7 @@ class TitleState extends MusicBeatState
 		gfDance.animation.addByIndices('danceRight', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
 		gfDance.antialiasing = true;
 		add(gfDance);
-		add(logoBl);
+		add(logoSprite);
 
 		var logo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('logo'));
 		logo.screenCenter();
@@ -138,7 +143,8 @@ class TitleState extends MusicBeatState
 
 		credTextShit.visible = false;
 
-		ngSpr = new EngineSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgrounds_logo'));
+		ngSpr = new EngineSprite(0, FlxG.height * 0.52);
+		ngSpr.loadGraphic(Paths.image('newgrounds_logo'));
 		add(ngSpr);
 		ngSpr.visible = false;
 		ngSpr.setGraphicSize(Std.int(ngSpr.width * 0.8));
@@ -205,20 +211,16 @@ class TitleState extends MusicBeatState
 
 		if (pressedEnter && !transitioning && skippedIntro)
 		{
-			if (titleText != null)
-				titleText.animation.play('press');
+			if (enterSprite != null)
+				enterSprite.animation.play('press');
 
 			FlxG.camera.flash(FlxColor.WHITE, 1);
 			FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 
 			transitioning = true;
 
-			new FlxTimer().start(2, function(tmr:FlxTimer)
-			{			
-				if (!versionsMatch)
-					ClassShit.switchState(new OutdatedSubState());
-				else
-					ClassShit.switchState(new MainMenuState());
+			new FlxTimer().start(2, function(tmr:FlxTimer) {			
+				FlxG.switchState(new FreeplayState());
 			});
 		}
 
@@ -262,8 +264,9 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit();
 
-		if (logoBl != null)
-			logoBl.animation.play('bump');
+		if (logoSprite != null)
+			logoSprite.animation.play('bump');
+
 		danceLeft = !danceLeft;
 
 		if (gfDance != null)

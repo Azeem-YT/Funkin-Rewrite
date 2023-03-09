@@ -2,7 +2,8 @@ package data;
 
 import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
-import Controls;
+import data.Controls;
+import data.*;
 
 using StringTools;
 
@@ -131,15 +132,13 @@ class PlayerPrefs
 		}
 
 		setFramerate();
-		Note.arrowColors = noteColors;
-		UINote.arrowColors = noteColors;
 
 		if (!loadedPrefs)
 			loadedPrefs = true;
 	}
 
 	public static function resetControls() {
-		PlayerController.playerControl.setKeyboardScheme(KeyboardScheme.Solo);
+		PlayerSettings.player1.controls.setKeyboardScheme(KeyboardScheme.Solo);
 
 		FlxG.sound.muteKeys = getKeys(volumeKeys.get('volume_mute'));
 		FlxG.sound.volumeDownKeys = getKeys(volumeKeys.get('volume_down'));

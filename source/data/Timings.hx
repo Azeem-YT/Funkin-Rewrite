@@ -1,12 +1,15 @@
 package data;
 
+import states.*;
+import data.*;
+
 class Timings
 {
 	public var imageName:String = 'sick';
 	public var name:String = 'sick';
 	public var hitWindow:Int = 0;
 	public var score:Int = 350;
-	public var noteSplash:Bool = true;
+	public var noteSplashes:Bool = true;
 
 	public function new(rating:String) {
 		this.name = rating;
@@ -25,6 +28,6 @@ class Timings
 		score = 50;
 	}
 
-	public function increaseCount()
+	public function increaseCounter()
 		return Reflect.setProperty(PlayState, name + 's', Reflect.getProperty(PlayState, name + 's') + 1);
 }

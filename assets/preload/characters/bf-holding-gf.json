@@ -1,0 +1,126 @@
+{
+  "framesPath": "characters/bfAndGF",
+  "camOffset": [
+    0,
+    0
+  ],
+  "animations": [
+    {
+      "prefix": "idle",
+      "anim": "BF idle dance",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "prefix": "singUP",
+      "anim": "BF NOTE UP0",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -29,
+        10
+      ]
+    },
+    {
+      "prefix": "singLEFT",
+      "anim": "BF NOTE LEFT0",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        12,
+        7
+      ]
+    },
+    {
+      "prefix": "singRIGHT",
+      "anim": "BF NOTE RIGHT0",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -41,
+        23
+      ]
+    },
+    {
+      "prefix": "singDOWN",
+      "anim": "BF NOTE DOWN0",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -10,
+        10
+      ]
+    },
+    {
+      "prefix": "singUPmiss",
+      "anim": "BF NOTE UP MISS",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -10,
+        10
+      ]
+    },
+    {
+      "prefix": "singDOWNmiss",
+      "anim": "BF NOTE DOWN MISS",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -10,
+        -10
+      ]
+    },
+    {
+      "prefix": "singLEFTmiss",
+      "anim": "BF NOTE LEFT MISS",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        12,
+        7
+      ]
+    },
+    {
+      "prefix": "singRIGHTmiss",
+      "anim": "BF NOTE RIGHT MISS",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -41,
+        43
+      ]
+    },
+    {
+      "prefix": "bfCatch",
+      "anim": "BF catches GF",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
+    }
+  ],
+  "healthIcon": "icon-bf",
+  "flipX": true,
+  "healthColors": [
+    49,
+    176,
+    209
+  ]
+}

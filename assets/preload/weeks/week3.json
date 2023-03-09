@@ -1,0 +1,11 @@
+{
+  "songs": [
+    "Pico",
+    "Philly",
+    "Blammed"
+  ],
+  "weekName": "PICO",
+  "weekImg": "week3",
+  "startUnlocked": true,
+  "menuChars": ["pico", "bf", "gf" ]
+}

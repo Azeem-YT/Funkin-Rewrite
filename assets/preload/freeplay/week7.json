@@ -1,0 +1,21 @@
+{
+	"songs": [
+		{
+			"song": "Ugh",
+			"charIcon": "icon-tankman",
+			"hiddenUntilUnlocked": false
+		},
+		{
+			"song": "Guns",
+			"charIcon": "icon-tankman",
+			"hiddenUntilUnlocked": false
+		},
+		{
+			"song": "Stress",
+			"charIcon": "icon-tankman",
+			"hiddenUntilUnlocked": false
+		}
+	],
+	"difficultys": ["Easy", "Normal", "Hard"],
+	"weekColors": [246, 182, 4]
+}

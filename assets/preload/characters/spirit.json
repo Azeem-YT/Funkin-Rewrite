@@ -1,0 +1,74 @@
+{
+  "framesPath": "characters/spirit",
+  "flipX": false,
+  "healthIcon": "icon-spirit",
+  "atlasType": "packer",
+  "noAntialisting": true,
+  "camOffset": [
+    0,
+    0
+  ],
+  "positionOffset": [
+    -150,
+    100
+  ],
+  "animations": [
+    {
+      "prefix": "idle",
+      "anim": "idle spirit_",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -220,
+        -280
+      ]
+    },
+    {
+      "prefix": "singUP",
+      "anim": "up_",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -220,
+        -240
+      ]
+    },
+    {
+      "prefix": "singLEFT",
+      "anim": "left_",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -220,
+        -280
+      ]
+    },
+    {
+      "prefix": "singRIGHT",
+      "anim": "right_",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -220,
+        -240
+      ]
+    },
+    {
+      "prefix": "singDOWN",
+      "anim": "spirit down_",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        170,
+        110
+      ]
+    }
+  ],
+  "healthColors": [ 255, 60, 110 ],
+  "scale": 6
+}

@@ -1,11 +1,12 @@
-package;
+package states;
 
-import Conductor.BPMChangeEvent;
+import data.Conductor.BPMChangeEvent;
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIState;
 import flixel.math.FlxRect;
 import flixel.util.FlxTimer;
+import data.*;
 
 class MusicBeatState extends FlxUIState
 {
@@ -14,6 +15,11 @@ class MusicBeatState extends FlxUIState
 
 	public var curStep:Int = 0;
 	public var curBeat:Int = 0;
+
+	public var controls(get, never):Controls;
+
+	inline function get_controls():Controls
+		return PlayerSettings.player1.controls;
 
 	override function create() {
 		super.create();

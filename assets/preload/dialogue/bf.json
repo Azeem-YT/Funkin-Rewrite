@@ -1,0 +1,33 @@
+{
+	"imgPath": "characters/BOYFRIEND",
+	"charAlignment": "right",
+	"animations": [
+		{
+			"anim": "talk",
+			"name": "BF NOTE RIGHT0",
+			"looped": false,
+			"offsets": [
+				0,
+				-5
+			]
+		},
+		{
+			"anim": "scared",
+			"name": "BF idle shaking",
+			"looped": true,
+			"offsets": [
+				0,
+				-5
+			]
+		},
+		{
+			"anim": "hey!",
+			"name": "BF HEY!!",
+			"looped": false,
+			"offsets": [
+				0,
+				0
+			]
+		}
+	]
+}

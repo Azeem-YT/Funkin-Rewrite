@@ -1,0 +1,55 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offset": [
+				7,
+				0
+			],
+			"fps": 24,
+			"prefix": "firstDeath",
+			"indices": [],
+			"anim": "BF Dies pixel"
+		},
+		{
+			"loop": false,
+			"offset": [
+				0,
+				0
+			],
+			"prefix": "deathLoop",
+			"fps": 24,
+			"anim": "Retry Loop",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offset": [
+				0,
+				0
+			],
+			"prefix": "deathConfirm",
+			"fps": 24,
+			"anim": "RETRY CONFIRM",
+			"indices": []
+		}
+	],
+	"noAntialiasing": true,
+	"framesPath": "characters/bfPixelsDEAD",
+	"positionOffset": [
+		0,
+		0
+	],
+	"healthIcon": "icon-bf-pixel",
+	"flipX": true,
+	"healthColors": [
+		123,
+		214,
+		246
+	],
+	"camOffset": [
+		-450,
+		-200
+	],
+	"scale": 6
+}

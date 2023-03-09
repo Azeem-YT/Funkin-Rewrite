@@ -1,0 +1,24 @@
+{
+	"dialogueData": [
+		{
+			"dialogue": "Cool Dialogue",
+			"char": "bf",
+			"animName": "enter",
+			"dialogueSpeed": 1
+		},
+		{
+			"dialogue": "Fuck You\nLine Break Test",
+			"char": "bf",
+			"animName": "hey!",
+			"dialogueSpeed": 0.05
+		},
+		{
+			"dialogue": "Oh no Scary",
+			"char": "bf",
+			"animName": "scared",
+			"dialogueSpeed": 0.5
+		}
+	],
+	"startBox": "normal",
+	"gameVisible": true
+}

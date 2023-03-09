@@ -1,0 +1,68 @@
+{
+  "framesPath": "characters/Mom_Assets",
+  "flipX": false,
+  "camOffset": [
+    0,
+    0
+  ],
+  "animations": [
+    {
+      "prefix": "idle",
+      "anim": "Mom Idle",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "prefix": "singUP",
+      "anim": "Mom Up Pose",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        14,
+        71
+      ]
+    },
+    {
+      "prefix": "singLEFT",
+      "anim": "Mom Left Pose",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        250,
+        -23
+      ]
+    },
+    {
+      "prefix": "singRIGHT",
+      "anim": "Mom Pose Left",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        10,
+        -60
+      ]
+    },
+    {
+      "prefix": "singDOWN",
+      "anim": "MOM DOWN POSE",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        20,
+        -160
+      ]
+    }
+  ],
+  "healthIcon": "icon-mom",
+  "scale": 1,
+  "idleOnBeat": 2
+}

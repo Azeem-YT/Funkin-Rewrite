@@ -1,6 +1,6 @@
 package data;
 
-import Section.SwagSection;
+import data.Section.SwagSection;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
@@ -14,7 +14,7 @@ typedef SwagSong =
 {
 	var song:String;
 	var notes:Array<SwagSection>;
-	var bpm:Int;
+	var bpm:Null<Int>;
 	var needsVoices:Bool;
 	var speed:Float;
 
@@ -27,9 +27,6 @@ typedef SwagSong =
 	var threePlayer:Bool;
 	var splashTexture:String;
 	var validScore:Bool;
-	#if desktop
-	var events:Array<Dynamic>;
-	#end
 }
 
 class Song
@@ -55,10 +52,9 @@ class Song
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
-		var rawJson = null;
+		var rawJson:String = null;
 		
 		var currentDirectory = Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase());
-		this.currentDirectory = currentDirectory;
 		rawJson = Paths.getContent(currentDirectory);
 
 		while (!rawJson.endsWith("}") && rawJson != null) {
@@ -75,6 +71,7 @@ class Song
 	{
 		var swagShit:SwagSong = cast Json.parse(rawJson).song;
 		swagShit.validScore = true;
+		if (swagShit.bpm == null) swagShit.bpm = 100;
 		return swagShit;
 	}
 }

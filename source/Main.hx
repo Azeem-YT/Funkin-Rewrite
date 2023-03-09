@@ -11,9 +11,10 @@ import openfl.events.Event;
 import haxe.CallStack.StackItem;
 import haxe.CallStack;
 import openfl.events.UncaughtErrorEvent;
-import sys.FileSystem;
-import sys.io.File;
 import lime.app.Application;
+
+import states.*;
+import data.*;
 
 class Main extends Sprite
 {
@@ -24,19 +25,20 @@ class Main extends Sprite
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false;
 	public static var currentState:String = 'TitleState';
-	public static var framerateCounter:FPS;
-	public static var fpsCap:Float = 60;
 	public static var gotFPS:Bool = false;
+	public static var fpsCap:Float = 60;
 	public static var loggedErrors:Array<String> = [];
 
-	public static function main():Void {
-		addChild(new Main());
+	// You can pretty much ignore everything from here on - your code should go in your states.
+
+	public static function main():Void
+	{
+		Lib.current.addChild(new Main());
 	}
 
-	public function new() {
+	public function new()
+	{
 		super();
-
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, gameCrashed);
 
 		if (stage != null) {
 			init();
@@ -46,19 +48,25 @@ class Main extends Sprite
 		}
 	}
 
-	private function init(?E:Event):Void {
-		if (hasEventListener(Event.ADDED_TO_STAGE)) {
+	private function init(?E:Event):Void
+	{
+		if (hasEventListener(Event.ADDED_TO_STAGE))
+		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 		}
 
 		setupGame();
 	}
 
-	private function setupGame():Void {
+	public static var framerateCounter:FPS;
+
+	private function setupGame():Void
+	{
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
 
-		if (zoom == -1) {
+		if (zoom == -1)
+		{
 			var ratioX:Float = stageWidth / gameWidth;
 			var ratioY:Float = stageHeight / gameHeight;
 			zoom = Math.min(ratioX, ratioY);
@@ -83,8 +91,13 @@ class Main extends Sprite
 		trace("Starting...");
 	}
 
-	public static function getFPSCounter()
+	private override function __update(transformOnly:Bool, updateChildren:Bool)
 	{
+		super.__update(transformOnly, updateChildren); //If you wanna update something in Main.
+
+	}
+
+	public static function getFPSCounter() {
 		if (!gotFPS) {
 			framerateCounter = new FPS(10, 3, 0xFFFFFF);
 			Lib.current.addChild(framerateCounter);
@@ -93,55 +106,8 @@ class Main extends Sprite
 		}
 	}
 
-	public static function setFPSVisible()
-	{
+	public static function setFPSVisible() {
 		if (framerateCounter != null)
 			framerateCounter.visible = PlayerPrefs.fpsCounter;
-	}
-
-	public static function gameCrashed(errorMsg:UncaughtErrorEvent)
-	{
-		var error:String = "Game Crashed!\n";
-		var crashPath:String;
-		var stack:Array<StackItem> = CallStack.exceptionStack(true);
-		var curDate:String = Date.now().toString();
-
-		curDate = StringTools.replace(curDate, " ", "_");
-		curDate = StringTools.replace(curDate, ":", "'");
-
-		crashPath = "crashs/UE_Crash" + curDate + ".txt";
-
-		if (!FileSystem.exists("crashs/"))
-			FileSystem.createDirectory("crashs/");
-
-		for (stackItem in stack)
-		{
-			switch (stackItem)
-			{
-				case FilePos(s, file, line, column):
-					error += file + " (line " + line + ")\n";
-				default:
-					Sys.println(stackItem);
-					error += Std.string(stackItem);
-			}
-		}
-
-		error += 'Logged Errors: \n';
-		for (i in 0...loggedErrors.length) {
-			error += '\n' + loggedErrors[i];
-		}
-
-		var errorShit:String = 'Unknown';
-
-		if (errorMsg != null)
-			errorShit = errorMsg.error;
-
-		error += '\nUncaught Error: ' + errorShit + '\nThis is most likey because this version is unfinished. Check for Updates! ';
-
-		File.saveContent(crashPath, error + "\n");
-
-		Application.current.window.alert(error, "Error!");
-		DiscordClient.shutdown();
-		Sys.exit(1);
 	}
 }

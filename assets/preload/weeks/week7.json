@@ -1,0 +1,11 @@
+{
+  "songs": [
+    "Ugh",
+    "Guns",
+    "Stress"
+  ],
+  "weekName": "TANKMAN",
+  "weekImg": "week7",
+  "startUnlocked": true,
+  "menuChars": ["tankman", "bf", "gf"]
+}

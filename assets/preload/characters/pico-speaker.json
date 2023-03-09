@@ -1,0 +1,59 @@
+{
+  "framesPath": "characters/picoSpeaker",
+  "camOffset": [
+    0,
+    0
+  ],
+  "animations": [
+    {
+      "prefix": "shoot1",
+      "anim": "Pico shoot 1",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "prefix": "shoot2",
+      "anim": "Pico shoot 2",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        -1,
+        -128
+      ]
+    },
+    {
+      "prefix": "shoot3",
+      "anim": "Pico shoot 3",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        412,
+        -64
+      ]
+    },
+    {
+      "prefix": "shoot4",
+      "anim": "Pico shoot 4",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        439,
+        -19
+      ]
+    }
+  ],
+  "healthIcon": "icon-pico",
+  "positionOffset": [
+    -100,
+    -150
+  ],
+  "flipX": false
+}

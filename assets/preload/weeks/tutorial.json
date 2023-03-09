@@ -1,0 +1,9 @@
+{
+  "songs": [
+    "Tutorial"
+  ],
+  "weekName": "Learn How To Play",
+  "weekImg": "week0",
+  "startUnlocked": true,
+  "menuChars": ["", "bf", "gf"]
+}

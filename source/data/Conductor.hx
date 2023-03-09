@@ -1,6 +1,7 @@
 package data;
 
-import Song.SwagSong;
+import data.Song.SwagSong;
+import data.*;
 
 typedef BPMChangeEvent =
 {

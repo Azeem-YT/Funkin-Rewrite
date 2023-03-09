@@ -10,12 +10,13 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
-import state.*;
+import flixel.FlxSprite;
+import states.*;
 import data.*;
 
 class HudGroup extends FlxSpriteGroup
 {
-	public var ratingText:FlxText;
+	public var scoreTxt:FlxText;
 	public var watermark:FlxText;
 
 	public var healthBarBG:FlxSprite;
@@ -62,7 +63,6 @@ class HudGroup extends FlxSpriteGroup
 
 		watermark = new FlxText(0, 0, 0, "Funkin' Rewrite");
 		watermark.setFormat(Paths.font('vcr.ttf'), 18);
-		watermark.cameras = [camHUD];
 		watermark.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 2);
 		add(watermark);
 	}
@@ -94,9 +94,9 @@ class HudGroup extends FlxSpriteGroup
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), gameInstance,
 			'health', 0, healthBarMax);
 		healthBar.scrollFactor.set();
-		healthBar.createFilledBar(FlxColor.fromRGB(colorArrayP2.healthColors[0], colorArrayP2.healthColors[1], 
-		colorArrayP2.healthColors[2]), FlxColor.fromRGB(colorArrayP1.healthColors[0], colorArrayP1.healthColors[1], 
-		colorArrayP1.healthColors[2]));
+		healthBar.createFilledBar(FlxColor.fromRGB(colorArrayP2[0], colorArrayP2[1], 
+		colorArrayP2[2]), FlxColor.fromRGB(colorArrayP1[0], colorArrayP1[1], 
+		colorArrayP1[2]));
 		add(healthBar);
 	}
 }
