@@ -1,6 +1,6 @@
 # Funkin' Rewriten
 
-**This is a Modded Version of Friday Night Funkin'**
+**This is a Mod of the Game Friday Night Funkin'**
 
 - Find the original version here: https://github.com/FunkinCrew/Funkin
 - Play original game on Newgrounds here: https://www.newgrounds.com/portal/view/770371
