@@ -2,8 +2,8 @@
 
 **This is a Modded Version of Friday Night Funkin'**
 
-Find the original version here: https://github.com/FunkinCrew/Funkin
-Play original game on Newgrounds here: https://www.newgrounds.com/portal/view/770371
+- Find the original version here: https://github.com/FunkinCrew/Funkin
+- Play original game on Newgrounds here: https://www.newgrounds.com/portal/view/770371
 
 # Compiling from source
 Follow these steps if you wanna compile the game from source:
