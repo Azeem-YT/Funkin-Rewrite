@@ -73,8 +73,8 @@ This will install about 4-5 GB of crap, but is necessary to build for Windows.
 
 ## Credits
 - ---------------Engine--------------------
-- Azeem - The only one working on this lol
+Azeem - The only one working on this lol
 - -------------Funkin Crew---------------
-- [ninjamuffin99](https://twitter.com/ninja_muffin99) - Programmer
-- [PhantomArcade3K](https://twitter.com/phantomarcade3k) and [Evilsk8r](https://twitter.com/evilsk8r) - Art
-- [Kawaisprite](https://twitter.com/kawaisprite) - Musician
+[ninjamuffin99](https://twitter.com/ninja_muffin99) - Programmer
+[PhantomArcade3K](https://twitter.com/phantomarcade3k) and [Evilsk8r](https://twitter.com/evilsk8r) - Art
+[Kawaisprite](https://twitter.com/kawaisprite) - Musician
