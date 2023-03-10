@@ -88,6 +88,12 @@ class CoolUtil
 		return false;
 	}
 
+	public static function alphaLerp(val:Float) {
+		if (val > 1) val = 1;
+		if (val < 0) val = 0;
+		return val;
+	}
+
 	/*
 	public static function optionFromText(path:String):OptionPref { //A
 		#if desktop

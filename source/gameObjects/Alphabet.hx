@@ -9,9 +9,6 @@ import flixel.util.FlxTimer;
 
 using StringTools;
 
-/**
- * Loosley based on FlxTypeText lolol
- */
 class Alphabet extends FlxSpriteGroup
 {
 	public var delay:Float = 0.05;
@@ -88,15 +85,16 @@ class Alphabet extends FlxSpriteGroup
 		var loopNum:Int = 0;
 
 		var xPos:Float = 0;
+		var yPos:Float = 0;
 		var curRow:Int = 0;
 
 		for (character in newCharacters)
 		{
-			if (_finalText.fastCodeAt(loopNum) == "\n".code)
-			{
+			if (_finalText.fastCodeAt(loopNum) == "\n".code) {
 				yMulti += 1;
 				xPosResetted = true;
 				xPos = 0;
+				yPos = 55 * yMulti;
 				curRow += 1;
 			}
 
@@ -120,22 +118,22 @@ class Alphabet extends FlxSpriteGroup
 					lastWasSpace = false;
 				}
 
-				var letter:AlphaCharacter = new AlphaCharacter(xPos, curRow * yMulti);
+				var letter:AlphaCharacter = new AlphaCharacter(xPos, yPos, isBold);
 				letter.row = curRow;
-				if (isBold) {
-					letter.createBold(splitWords[loopNum]);
-				}
-				else
-				{
-					if (isNumber)
-						letter.createNumber(splitWords[loopNum]);
-					else if (isSymbol)
-						letter.createSymbol(splitWords[loopNum]);
-					else
-						letter.createLetter(splitWords[loopNum]);
 
-					letter.x += 90;
+				if (isNumber)
+					letter.createNumber(splitWords[loopNum]);
+				else if (isSymbol)
+					letter.createSymbol(splitWords[loopNum]);
+				else {
+					if (isBold)
+						letter.createBold(splitWords[loopNum]);
+					else {
+						letter.createLetter(splitWords[loopNum]);
+					}
 				}
+
+				letter.y = yPos + letter.maxHeight - letter.height;
 
 				add(letter);
 
@@ -188,15 +186,16 @@ class Alphabet extends FlxSpriteGroup
 		var loopNum:Int = 0;
 
 		var xPos:Float = 0;
+		var yPos:Float = 0;
 		var curRow:Int = 0;
 
 		new FlxTimer().start(typeSpeed, function(tmr:FlxTimer)
 		{
-			if (_finalText.fastCodeAt(loopNum) == "\n".code)
-			{
+			if (_finalText.fastCodeAt(loopNum) == "\n".code) {
 				yMulti += 1;
 				xPosResetted = true;
 				xPos = 0;
+				yPos = 55 * yMulti;
 				curRow += 1;
 			}
 
@@ -220,7 +219,7 @@ class Alphabet extends FlxSpriteGroup
 					lastWasSpace = false;
 				}
 
-				var letter:AlphaCharacter = new AlphaCharacter(xPos, 55 * yMulti);
+				var letter:AlphaCharacter = new AlphaCharacter(xPos, yPos, isBold);
 				letter.row = curRow;
 				if (inDialogue) {
 					letter.scale.set(0.7, 0.7);
@@ -235,9 +234,10 @@ class Alphabet extends FlxSpriteGroup
 						letter.createBold(splitWords[loopNum]);
 					else {
 						letter.createLetter(splitWords[loopNum]);
-						letter.x += 90;
 					}
 				}
+
+				letter.y = yPos + letter.maxHeight - letter.height;
 
 				add(letter);
 
@@ -259,12 +259,9 @@ class Alphabet extends FlxSpriteGroup
 		{
 			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
 
-			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), 0.16);
-
-			if (optionItem)
-				x = FlxMath.lerp(x, (targetY * 20 * 3) + 90 * 1.1, 0.16);
-			else
-				x = FlxMath.lerp(x, (targetY * 20) + 90, 0.16);
+			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), CoolUtil.alphaLerp(elapsed * 10));
+			
+			x = FlxMath.lerp(x, (targetY * 20) + 90, CoolUtil.alphaLerp(elapsed * 10));
 		}
 
 		super.update(elapsed);
@@ -279,77 +276,65 @@ class AlphaCharacter extends FlxSprite
 
 	public static var symbols:String = "|~#$%()*+-:;<=>@[]^_.,'!?";
 
+	public var maxHeight:Float = 0.0;
+
 	public var row:Int = 0;
 
-	public function new(x:Float, y:Float)
+	public function new(x:Float, y:Float, ?bold:Bool = false)
 	{
 		super(x, y);
-		var tex = Paths.getSparrowAtlas('alphabet');
+		var tex = Paths.getSparrowAtlas('fonts/default');
+
+		if (bold)
+			tex = Paths.getSparrowAtlas('fonts/bold');
+
 		frames = tex;
+
+		for (frame in frames.frames) {
+			maxHeight = Math.max(maxHeight, frame.frame.height);
+		}
 
 		antialiasing = true;
 	}
 
-	public function createBold(letter:String)
-	{
-		animation.addByPrefix(letter, letter.toUpperCase() + " bold", 24);
+	public function createBold(letter:String) {
+		animation.addByPrefix(letter, letter.toUpperCase(), 24);
 		animation.play(letter);
 		updateHitbox();
 	}
 
-	public function createLetter(letter:String):Void
-	{
-		var letterCase:String = "lowercase";
-		if (letter.toLowerCase() != letter) {
-			letterCase = 'capital';
-		}
-
-		animation.addByPrefix(letter, letter + " " + letterCase, 24);
+	public function createLetter(letter:String):Void {
+		animation.addByPrefix(letter, letter, 24);
 		animation.play(letter);
 		updateHitbox();
-
-		y = (110 - height);
-		y += row * 60;
 	}
 
-	public function createNumber(letter:String):Void
-	{
+	public function createNumber(letter:String):Void {
 		animation.addByPrefix(letter, letter, 24);
 		animation.play(letter);
 
 		updateHitbox();
 	}
 
-	public function createSymbol(letter:String)
-	{
-		switch (letter)
+	public function getSymbolPrefix(char:String):String {
+		return switch (char)
 		{
-			case '.':
-				animation.addByPrefix(letter, 'period', 24);
-				animation.play(letter);
-				y += 50;
-			case "'":
-				animation.addByPrefix(letter, 'apostraphie', 24);
-				animation.play(letter);
-			case "?":
-				animation.addByPrefix(letter, 'question mark', 24);
-				animation.play(letter);
-			case "!":
-				animation.addByPrefix(letter, 'exclamation point', 24);
-				animation.play(letter);
-			case "$": 
-				animation.addByPrefix(letter, 'dollarsign', 24);
-				animation.play(letter);
-			case "}":
-				animation.addByPrefix(letter, 'end parentheses', 24);
-				animation.play(letter);
-			case "{":
-				animation.addByPrefix(letter, 'start parentheses', 24);
-				animation.play(letter);
-			default:
-				animation.addByPrefix(letter, letter, 24);
-				animation.play(letter);
+			case '-': '-dash-';
+			case '.': '-period-';
+			case ",": '-comma-';
+			case "'": '-apostraphie-';
+			case "?": '-question mark-';
+			case "!": '-exclamation point-';
+			case "\\": '-back slash-';
+			case "/": '-forward slash-';
+			case "*": '-multiply x-';
+			default: char;
 		}
+	}
+
+	public function createSymbol(letter:String) {
+		animation.addByPrefix(letter, getSymbolPrefix(letter), 24);
+		animation.play(letter);
 		updateHitbox();
 	}
 }

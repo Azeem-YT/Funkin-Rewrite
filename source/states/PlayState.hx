@@ -1012,8 +1012,8 @@ class PlayState extends MusicBeatState
 			trace('add gf ' + gf.curCharacter);
 		}
 
-		if (char != null) {
-			add(char.ghostGroup);
+		if (char != null && charGroup != null) {
+			insert(members.indexOf(charGroup), char.ghostGroup);
 			charGroup.add(char);
 		}
 
@@ -1436,7 +1436,7 @@ class PlayState extends MusicBeatState
 				nextNote = unspawnNotes[i + 1];
 
 			if (nextNote != null) {
-				if (curNote.strumTime == nextNote.strumTime && (nextNote.noteData == curNote.noteData))
+				if (curNote.strumTime == nextNote.strumTime && (nextNote.noteData == curNote.noteData && nextNote.strumID == curNote.strumID))
 					unspawnNotes.remove(nextNote);
 			}
 		}//Get rid of stacked notes;

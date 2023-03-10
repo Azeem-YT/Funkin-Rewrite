@@ -21,6 +21,7 @@ class Paths
 	public static var currentSongDir:String = 'assets/songs/tutorial';
 	public static var moddedGraphicsLoaded:Map<String, Bool> = new Map<String, Bool>();
 	public static var graphicIsLoaded:Map<String, Bool> = new Map<String, Bool>();
+	public static var currentLevel:String = '';
 
 	inline static public function getAssetDirectory(key:String, ?library:String = '', ?type:AssetType = IMAGE) {
 
@@ -31,7 +32,7 @@ class Paths
 		if (OpenFlAssets.exists(levelPath, type))
 				return levelPath;
 
-		if (Assets.exists(getLibraryPath(key, 'shared')) && (library != null && library.length > 0))
+		if (Assets.exists(getLibraryPath(key, 'shared')))
 			return getLibraryPath(key, 'shared');
 
 		return getPreloadPath(key);
@@ -125,7 +126,7 @@ class Paths
 		return getAssetDirectory('music/$key.ogg', library, SOUND);
 	}
 
-	inline static public function soundAsset(key:String, ?library)
+	inline static public function soundAsset(key:String, ?library:String = null)
 		return getAssetDirectory('sounds/$key.ogg', library);
 
 	inline static public function characterFile(char:String, ?isPlayer:Bool = false) {
@@ -242,7 +243,7 @@ class Paths
 			}
 		}
 		
-		if (Assets.exists(imagePth(key, library)) && graphic == null && graphicOnAsset) {
+		if ((Assets.exists(imagePth(key, library)) && graphic == null) && graphicOnAsset) {
 			if (!graphicIsLoaded.exists(key)) {
 				var bitmap:BitmapData = BitmapData.fromFile(imagePth(key, library));
 				var graphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, key);
@@ -292,7 +293,7 @@ class Paths
 	}
 
 	inline static public function mods(key:String = '')
-		return (key != null ? 'mods/' : 'mods/$key');
+		return ((key == null || key == '') ? 'mods/' : 'mods/$key');
 
 	inline static public function modSounds(key:String)
 		return mods('sounds/$key.ogg');
