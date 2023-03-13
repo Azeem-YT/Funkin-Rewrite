@@ -20,7 +20,7 @@ class FPS extends TextField
 	private var times:Array<Float>;
 	private var memoryCount:Float;
 	private var maxMemory:Float;
-	private var versionText:String = 'Unknown-Engine Beta 3';
+	private var versionText:String = "Funkin' Rewrite";
 	public static var currentClass:Dynamic = 'TitleState';
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)

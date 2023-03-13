@@ -7,9 +7,9 @@
 				0
 			],
 			"fps": 24,
-			"prefix": "firstDeath",
+			"anim": "firstDeath",
 			"indices": [],
-			"anim": "BF Dies pixel"
+			"prefix": "BF Dies pixel"
 		},
 		{
 			"loop": false,
@@ -17,9 +17,9 @@
 				0,
 				0
 			],
-			"prefix": "deathLoop",
+			"anim": "deathLoop",
 			"fps": 24,
-			"anim": "Retry Loop",
+			"prefix": "Retry Loop",
 			"indices": []
 		},
 		{
@@ -28,14 +28,14 @@
 				0,
 				0
 			],
-			"prefix": "deathConfirm",
+			"anim": "deathConfirm",
 			"fps": 24,
-			"anim": "RETRY CONFIRM",
+			"prefix": "RETRY CONFIRM",
 			"indices": []
 		}
 	],
 	"noAntialiasing": true,
-	"framesPath": "characters/bfPixelsDEAD",
+	"image": "characters/bfPixelsDEAD",
 	"positionOffset": [
 		0,
 		0

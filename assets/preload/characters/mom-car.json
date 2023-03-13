@@ -1,5 +1,5 @@
 {
-  "framesPath": "characters/momCar",
+  "image": "characters/momCar",
   "flipX": false,
   "camOffset": [
     0,
@@ -7,8 +7,8 @@
   ],
   "animations": [
     {
-      "prefix": "idle",
-      "anim": "Mom Idle",
+      "anim": "idle",
+      "prefix": "Mom Idle",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -18,8 +18,8 @@
       ]
     },
     {
-      "prefix": "singUP",
-      "anim": "Mom Up Pose",
+      "anim": "singUP",
+      "prefix": "Mom Up Pose",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -29,8 +29,8 @@
       ]
     },
     {
-      "prefix": "singLEFT",
-      "anim": "Mom Left Pose",
+      "anim": "singLEFT",
+      "prefix": "Mom Left Pose",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -40,8 +40,8 @@
       ]
     },
     {
-      "prefix": "singRIGHT",
-      "anim": "Mom Pose Left",
+      "anim": "singRIGHT",
+      "prefix": "Mom Pose Left",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -51,8 +51,8 @@
       ]
     },
     {
-      "prefix": "singDOWN",
-      "anim": "MOM DOWN POSE",
+      "anim": "singDOWN",
+      "prefix": "MOM DOWN POSE",
       "indices": [],
       "fps": 24,
       "loop": false,

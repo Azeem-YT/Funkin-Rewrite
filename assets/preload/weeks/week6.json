@@ -1,11 +1,12 @@
 {
   "songs": [
-    "Senpai",
-    "Roses",
-    "Thorns"
+    [ "Senpai", "senpai" ],
+    [ "Roses", "senpai" ],
+    [ "Thorns", "spirit" ]
   ],
   "weekName": "hating simulator ft. moawling",
   "weekImg": "week6",
   "startUnlocked": true,
-  "menuChars": [ "senpai", "bf", "gf" ]
+  "menuChars": [ "senpai", "bf", "gf" ],
+  "freeplayColor": [ 255, 120, 191 ]
 }

@@ -220,7 +220,7 @@ class TitleState extends MusicBeatState
 			transitioning = true;
 
 			new FlxTimer().start(2, function(tmr:FlxTimer) {			
-				FlxG.switchState(new FreeplayState());
+				FlxG.switchState(new MainMenuState());
 			});
 		}
 

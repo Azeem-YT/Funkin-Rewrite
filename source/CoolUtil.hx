@@ -27,13 +27,22 @@ class CoolUtil
 
 		var fileExists:Bool;
 
+		#if sys
 		fileExists = FileSystem.exists(path);
+		#else
+		fileExists = Assets.exists(path);
+		#end
 
 		if (fileExists) {
-			var daList:Array<String> = File.getContent(path).trim().split('\n');
+			var daList:Array<String> = [];
+			
+			#if sys
+			daList = File.getContent(path).trim().split('\n');
+			#else
+			daList = Assets.getText(path).trim().split('\n');
+			#end
 
-			for (i in 0...daList.length)
-			{
+			for (i in 0...daList.length) {
 				daList[i] = daList[i].trim();
 			}
 
@@ -88,13 +97,12 @@ class CoolUtil
 		return false;
 	}
 
-	public static function alphaLerp(val:Float) {
+	public static function elapsedLerp(val:Float):Float {
 		if (val > 1) val = 1;
 		if (val < 0) val = 0;
 		return val;
 	}
 
-	/*
 	public static function optionFromText(path:String):OptionPref { //A
 		#if desktop
 		var list:Array<String> = File.getContent(path).trim().split('\n');
@@ -177,6 +185,6 @@ class CoolUtil
 				false
 			);
 	}
-	*/
+
 	//Ill add it soon
 }

@@ -1,13 +1,13 @@
 {
-  "framesPath": "characters/picoSpeaker",
+  "image": "characters/picoSpeaker",
   "camOffset": [
     0,
     0
   ],
   "animations": [
     {
-      "prefix": "shoot1",
-      "anim": "Pico shoot 1",
+      "anim": "shoot1",
+      "prefix": "Pico shoot 1",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -17,8 +17,8 @@
       ]
     },
     {
-      "prefix": "shoot2",
-      "anim": "Pico shoot 2",
+      "anim": "shoot2",
+      "prefix": "Pico shoot 2",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -28,8 +28,8 @@
       ]
     },
     {
-      "prefix": "shoot3",
-      "anim": "Pico shoot 3",
+      "anim": "shoot3",
+      "prefix": "Pico shoot 3",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -39,8 +39,8 @@
       ]
     },
     {
-      "prefix": "shoot4",
-      "anim": "Pico shoot 4",
+      "anim": "shoot4",
+      "prefix": "Pico shoot 4",
       "indices": [],
       "fps": 24,
       "loop": false,

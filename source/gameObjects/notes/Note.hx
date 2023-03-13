@@ -92,7 +92,7 @@ class Note extends FlxSprite
 		return tex;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, noteType:String = 'none', ?inCharter:Bool = false, ?strumID:Int = 0)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?noteType:String = 'none', ?inCharter:Bool = false, ?strumID:Int = 0)
 	{
 		super();
 

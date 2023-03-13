@@ -1,11 +1,12 @@
 {
   "songs": [
-    "Ugh",
-    "Guns",
-    "Stress"
+    [ "Ugh", "tankman" ],
+    [ "Guns", "tankman" ],
+    [ "Stress", "tankman" ]
   ],
   "weekName": "TANKMAN",
   "weekImg": "week7",
   "startUnlocked": true,
-  "menuChars": ["tankman", "bf", "gf"]
+  "menuChars": [ "tankman", "bf", "gf" ],
+  "freeplayColor": [ 246, 182, 4 ]
 }

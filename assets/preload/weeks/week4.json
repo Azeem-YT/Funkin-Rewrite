@@ -1,11 +1,12 @@
 {
   "songs": [
-    "Satin-Panties",
-    "High",
-    "Milf"
+    [ "Satin-Panties", "mom" ],
+    [ "High", "mom" ],
+    [ "Milf", "mom" ]
   ],
   "weekName": "MOMMY MUST MURDER",
   "weekImg": "week4",
   "startUnlocked": true,
-  "menuChars": ["mom", "bf", "gf"]
+  "menuChars": [ "mom", "bf", "gf" ],
+  "freeplayColor": [ 252, 150, 215 ]
 }

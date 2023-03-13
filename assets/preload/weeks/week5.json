@@ -1,11 +1,12 @@
 {
   "songs": [
-    "Cocoa",
-    "Eggnog",
-    "Winter-Horrorland"
+    [ "Cocoa", "parents-christmas" ],
+    [ "Eggnog", "parents-christmas" ],
+    [ "Winter-Horrorland", "monster" ]
   ],
   "weekName": "RED SNOW",
   "weekImg": "week5",
   "startUnlocked": true,
-  "menuChars": [ "parents-christmas", "bf", "gf"]
+  "menuChars": [ "parents-christmas", "bf", "gf" ],
+  "freeplayColors": [ 160, 209, 255 ]
 }

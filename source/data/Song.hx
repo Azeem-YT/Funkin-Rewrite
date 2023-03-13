@@ -4,9 +4,12 @@ import data.Section.SwagSection;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
+import timeEvents.Event;
 
+#if sys
 import sys.io.File;
 import sys.FileSystem;
+#end
 
 using StringTools;
 
@@ -24,7 +27,6 @@ typedef SwagSong =
 	var stage:String;
 	var arrowTexture:String;
 	var numbPlayers:Int;
-	var threePlayer:Bool;
 	var splashTexture:String;
 	var validScore:Bool;
 }
@@ -41,7 +43,7 @@ class Song
 	public var player2:String = 'dad';
 	public var gfVersion:String = 'gf';
 
-	public static var currentDirectory:String = 'assets/data/tutorial';
+	public static var currentDirectory:String = 'assets/data/tutorial/';
 
 	public function new(song, notes, bpm)
 	{
@@ -54,8 +56,8 @@ class Song
 	{
 		var rawJson:String = null;
 		
-		var currentDirectory = Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase());
-		rawJson = Paths.getContent(currentDirectory);
+		var pathDirectory = Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase());
+		rawJson = Paths.getContent(pathDirectory);
 
 		while (!rawJson.endsWith("}") && rawJson != null) {
 			rawJson = rawJson.substr(0, rawJson.length - 1);
@@ -67,11 +69,25 @@ class Song
 		return null;
 	}
 
+	public function loadEvents(folder:String):EventData {
+		var rawJson:String = null;
+
+		rawJson = Paths.getContent(Paths.json('data/' + folder.toLowerCase() + '/events'));
+
+		while (!rawJson.endsWith("}") && rawJson != null) {
+			rawJson = rawJson.substr(0, rawJson.length - 1);
+		}
+
+		if (rawJson != null)
+			return cast Json.parse(rawJson);
+
+		return null;
+	}
+
 	public static function parseJSONshit(rawJson:String):SwagSong
 	{
 		var swagShit:SwagSong = cast Json.parse(rawJson).song;
 		swagShit.validScore = true;
-		if (swagShit.bpm == null) swagShit.bpm = 100;
 		return swagShit;
 	}
 }

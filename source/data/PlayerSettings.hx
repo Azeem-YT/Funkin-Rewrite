@@ -49,6 +49,7 @@ class PlayerSettings
 			controls.setKeyboardScheme(Solo);
 	}
 	
+	/*
 	function addGamepad(gamepad:FlxGamepad)
 	{
 		var useDefault = true;
@@ -72,6 +73,7 @@ class PlayerSettings
 		if (useDefault)
 			controls.addDefaultGamepad(gamepad.id);
 	}
+	*/
 	
 	public function saveControls()
 	{
@@ -79,8 +81,7 @@ class PlayerSettings
 			FlxG.save.data.controls = {};
 		
 		var playerData:{ ?keys:Dynamic, ?pad:Dynamic }
-		if (id == 0)
-		{
+		if (id == 0) {
 			if (FlxG.save.data.controls.p1 == null)
 				FlxG.save.data.controls.p1 = {};
 			playerData = FlxG.save.data.controls.p1;
@@ -119,6 +120,7 @@ class PlayerSettings
 			++numPlayers;
 		}
 		
+		/*
 		FlxG.gamepads.deviceConnected.add(onGamepadAdded);
 
 		var numGamepads = FlxG.gamepads.numActiveGamepads;
@@ -128,14 +130,16 @@ class PlayerSettings
 			if (gamepad != null)
 				onGamepadAdded(gamepad);
 		}
+		*/
 	}
 	
+	/*
 	static function onGamepadAdded(gamepad:FlxGamepad) {
 		player1.addGamepad(gamepad);
 	}
+	*/
 
-	static public function reset()
-	{
+	static public function reset() {
 		player1 = null;
 		player2 = null;
 		numPlayers = 0;

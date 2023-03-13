@@ -1,5 +1,5 @@
 {
-  "framesPath": "characters/spirit",
+  "image": "characters/spirit",
   "flipX": false,
   "healthIcon": "icon-spirit",
   "atlasType": "packer",
@@ -14,8 +14,8 @@
   ],
   "animations": [
     {
-      "prefix": "idle",
-      "anim": "idle spirit_",
+      "anim": "idle",
+      "prefix": "idle spirit_",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -25,8 +25,8 @@
       ]
     },
     {
-      "prefix": "singUP",
-      "anim": "up_",
+      "anim": "singUP",
+      "prefix": "up_",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -36,8 +36,8 @@
       ]
     },
     {
-      "prefix": "singLEFT",
-      "anim": "left_",
+      "anim": "singLEFT",
+      "prefix": "left_",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -47,8 +47,8 @@
       ]
     },
     {
-      "prefix": "singRIGHT",
-      "anim": "right_",
+      "anim": "singRIGHT",
+      "prefix": "right_",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -58,8 +58,8 @@
       ]
     },
     {
-      "prefix": "singDOWN",
-      "anim": "spirit down_",
+      "anim": "singDOWN",
+      "prefix": "spirit down_",
       "indices": [],
       "fps": 24,
       "loop": false,

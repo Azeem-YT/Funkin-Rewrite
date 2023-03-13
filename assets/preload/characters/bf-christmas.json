@@ -1,13 +1,13 @@
 {
-  "framesPath": "characters/bfChristmas",
+  "image": "characters/bfChristmas",
   "camOffset": [
     0,
     0
   ],
   "animations": [
     {
-      "prefix": "idle",
-      "anim": "BF idle dance",
+      "anim": "idle",
+      "prefix": "BF idle dance",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -17,8 +17,8 @@
       ]
     },
     {
-      "prefix": "singUP",
-      "anim": "BF NOTE UP0",
+      "anim": "singUP",
+      "prefix": "BF NOTE UP0",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -28,8 +28,8 @@
       ]
     },
     {
-      "prefix": "singLEFT",
-      "anim": "BF NOTE LEFT0",
+      "anim": "singLEFT",
+      "prefix": "BF NOTE LEFT0",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -39,8 +39,8 @@
       ]
     },
     {
-      "prefix": "singRIGHT",
-      "anim": "BF NOTE RIGHT0",
+      "anim": "singRIGHT",
+      "prefix": "BF NOTE RIGHT0",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -50,8 +50,8 @@
       ]
     },
     {
-      "prefix": "singDOWN",
-      "anim": "BF NOTE DOWN0",
+      "anim": "singDOWN",
+      "prefix": "BF NOTE DOWN0",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -61,8 +61,8 @@
       ]
     },
     {
-      "prefix": "singUPmiss",
-      "anim": "BF NOTE UP MISS",
+      "anim": "singUPmiss",
+      "prefix": "BF NOTE UP MISS",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -72,8 +72,8 @@
       ]
     },
     {
-      "prefix": "singDOWNmiss",
-      "anim": "BF NOTE DOWN MISS",
+      "anim": "singDOWNmiss",
+      "prefix": "BF NOTE DOWN MISS",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -83,8 +83,8 @@
       ]
     },
     {
-      "prefix": "singLEFTmiss",
-      "anim": "BF NOTE LEFT MISS",
+      "anim": "singLEFTmiss",
+      "prefix": "BF NOTE LEFT MISS",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -94,8 +94,8 @@
       ]
     },
     {
-      "prefix": "singRIGHTmiss",
-      "anim": "BF NOTE RIGHT MISS",
+      "anim": "singRIGHTmiss",
+      "prefix": "BF NOTE RIGHT MISS",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -105,8 +105,8 @@
       ]
     },
     {
-      "prefix": "hey",
-      "anim": "BF HEY",
+      "anim": "hey",
+      "prefix": "BF HEY",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -116,8 +116,8 @@
       ]
     },
     {
-      "prefix": "firstDeath",
-      "anim": "BF dies",
+      "anim": "firstDeath",
+      "prefix": "BF dies",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -127,8 +127,8 @@
       ]
     },
     {
-      "prefix": "deathLoop",
-      "anim": "BF Dead Loop",
+      "anim": "deathLoop",
+      "prefix": "BF Dead Loop",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -138,8 +138,8 @@
       ]
     },
     {
-      "prefix": "deathConfirm",
-      "anim": "BF Dead confirm",
+      "anim": "deathConfirm",
+      "prefix": "BF Dead confirm",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -149,8 +149,8 @@
       ]
     },
     {
-      "prefix": "scared",
-      "anim": "BF idle shaking",
+      "anim": "scared",
+      "prefix": "BF idle shaking",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -160,8 +160,8 @@
       ]
     },
     {
-      "prefix": "dodge",
-      "anim": "boyfriend dodge",
+      "anim": "dodge",
+      "prefix": "boyfriend dodge",
       "indices": [],
       "fps": 24,
       "loop": false,

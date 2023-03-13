@@ -1,11 +1,12 @@
 {
   "songs": [
-    "Pico",
-    "Philly",
-    "Blammed"
+    [ "Pico", "pico" ],
+    [ "Philly", "pico" ],
+    [ "Blammed", "pico" ]
   ],
   "weekName": "PICO",
   "weekImg": "week3",
   "startUnlocked": true,
-  "menuChars": ["pico", "bf", "gf" ]
+  "menuChars": [ "pico", "bf", "gf" ],
+  "freeplayColor": [ 148, 22, 83 ]
 }

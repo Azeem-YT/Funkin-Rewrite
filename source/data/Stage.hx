@@ -17,6 +17,7 @@ typedef StageData =
 	var gfPos:Array<Float>;
 	var camZoom:Float;
 	var hidegf:Bool;
+	var isDefault:Bool
 }
 
 class Stage 
@@ -66,7 +67,8 @@ class Stage
 			"dadPos": [100.0, 100.0],
 			"gfPos": [400.0, 130.0],
 			"camZoom": 1.0,
-			"hidegf": false
+			"hidegf": false,
+			"isDefault": true
 		};
 
 		return jsonData;

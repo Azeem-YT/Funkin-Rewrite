@@ -6,6 +6,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 class MenuCharacter extends FlxSprite
 {
 	public var character:String;
+	private var defaultAnim:String = 'bf';
 
 	public function new(x:Float, character:String = 'bf')
 	{
@@ -25,9 +26,22 @@ class MenuCharacter extends FlxSprite
 		animation.addByPrefix('mom', "Mom Idle BLACK LINES", 24);
 		animation.addByPrefix('parents-christmas', "Parent Christmas Idle", 24);
 		animation.addByPrefix('senpai', "SENPAI idle Black Lines", 24);
+		animation.addByPrefix('tankman', "SENPAI idle Black Lines", 24);
 		// Parent Christmas Idle
 
-		animation.play(character);
+		playAnim(character);
 		updateHitbox();
 	}
+
+	public function playAnim(name:String) {
+		if (name == '' || name == null) {
+			animation.play(defaultAnim);
+			visible = false;
+		}
+		else {
+			animation.play(name);
+			visible = true;
+		}
+	}
+
 }

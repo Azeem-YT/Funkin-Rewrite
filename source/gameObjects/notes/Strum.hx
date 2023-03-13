@@ -60,8 +60,18 @@ class NoteSplash extends FlxSprite
 		if (PlayState.SONG != null)
 			splashTex = PlayState.SONG.splashTexture;
 
-		if (FileSystem.exists(Paths.json('noteSplashes/' + splashTex))) {
+		#if sys
+		if (FileSystem.exists(Paths.json('noteSplashes/' + splashTex))) 
+		#else
+		if (Assets.exists(Paths.json('noteSplashes/' + splashTex)))
+		#end
+		{
+			#if sys
 			splashData = Json.parse(File.getContent(Paths.json('noteSplashes/' + splashTex)));
+			#else
+			splashData = Json.parse(Assets.getText(Paths.json('noteSplashes/' + splashTex)));
+			#end
+
 			texturePath = splashTex;
 
 			if (splashData.useFrames) {

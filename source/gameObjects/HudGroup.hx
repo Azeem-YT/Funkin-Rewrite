@@ -94,9 +94,9 @@ class HudGroup extends FlxSpriteGroup
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), gameInstance,
 			'health', 0, healthBarMax);
 		healthBar.scrollFactor.set();
-		healthBar.createFilledBar(FlxColor.fromRGB(colorArrayP2[0], colorArrayP2[1], 
-		colorArrayP2[2]), FlxColor.fromRGB(colorArrayP1[0], colorArrayP1[1], 
-		colorArrayP1[2]));
+		healthBar.createFilledBar(FlxColor.fromRGB(colorArrayP1[0], colorArrayP1[1], 
+		colorArrayP1[2]), FlxColor.fromRGB(colorArrayP2[0], colorArrayP2[1], 
+		colorArrayP2[2]));
 		add(healthBar);
 	}
 }

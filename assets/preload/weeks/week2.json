@@ -1,11 +1,12 @@
 {
   "songs": [
-    "Spookeez",
-    "South",
-    "Monster"
+    [ "Spookeez", "spooky" ],
+    [ "South", "spooky" ],
+    [ "Monster", "monster" ]
   ],
   "weekName": "Spooky Month",
   "weekImg": "week2",
   "startUnlocked": true,
-  "menuChars": ["spooky", "bf", "gf" ]
+  "menuChars": [ "spooky", "bf", "gf" ],
+  "freeplayColor": [ 146, 113, 253 ]
 }

@@ -7,9 +7,6 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxSort;
 import flixel.graphics.frames.FlxFrame;
-import sys.io.File;
-import sys.FileSystem;
-import helpers.*;
 import openfl.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
@@ -19,6 +16,10 @@ import data.Song;
 import states.*;
 import data.PlayerPrefs;
 import flixel.group.FlxSpriteGroup;
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+#end
 
 using StringTools;
 
@@ -94,145 +95,99 @@ class Character extends EngineSprite
 
 		curCharacter = character;
 		this.isPlayer = isPlayer;
+		antialiasing = PlayerPrefs.antialiasing;
 		resetVars();
 
 		switch (curCharacter) {
-			case 'gf':
-				frames = Paths.getSparrowAtlas('characters/GF_assets');
-				quickAnimAdd('cheer', 'GF Cheer');
-				quickAnimAdd('singLEFT', 'GF left note');
-				quickAnimAdd('singRIGHT', 'GF Right Note');
-				quickAnimAdd('singUP', 'GF Up Note');
-				quickAnimAdd('singDOWN', 'GF Down Note');
-				animation.addByIndices('sad', 'gf sad', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "", 24, true);
-				animation.addByIndices('danceLeft', 'GF Dancing Beat', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-				animation.addByIndices('danceRight', 'GF Dancing Beat', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
-				animation.addByIndices('hairBlow', "GF Dancing Beat Hair blowing", [0, 1, 2, 3], "", 24);
-				animation.addByIndices('hairFall', "GF Dancing Beat Hair Landing", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "", 24, false);
-				animation.addByPrefix('scared', 'GF FEAR', 24, true);
-
-				playAnim('danceRight');
-
-			case 'dad':
-				frames = Paths.getSparrowAtlas('characters/DADDY_DEAREST');
-				quickAnimAdd('idle', 'Dad idle dance');
-				quickAnimAdd('singUP', 'Dad Sing Note UP');
-				quickAnimAdd('singRIGHT', 'Dad Sing Note RIGHT');
-				quickAnimAdd('singDOWN', 'Dad Sing Note DOWN');
-				quickAnimAdd('singLEFT', 'Dad Sing Note LEFT');
-
-				playAnim('idle');
-
-			case 'bf':
-				frames = Paths.getSparrowAtlas('characters/BOYFRIEND');
-				quickAnimAdd('idle', 'BF idle dance');
-				quickAnimAdd('singUP', 'BF NOTE UP0');
-				quickAnimAdd('singLEFT', 'BF NOTE LEFT0');
-				quickAnimAdd('singRIGHT', 'BF NOTE RIGHT0');
-				quickAnimAdd('singDOWN', 'BF NOTE DOWN0');
-				quickAnimAdd('singUPmiss', 'BF NOTE UP MISS');
-				quickAnimAdd('singLEFTmiss', 'BF NOTE LEFT MISS');
-				quickAnimAdd('singRIGHTmiss', 'BF NOTE RIGHT MISS');
-				quickAnimAdd('singDOWNmiss', 'BF NOTE DOWN MISS');
-				quickAnimAdd('hey', 'BF HEY');
-				quickAnimAdd('firstDeath', "BF dies");
-				quickAnimAdd('deathConfirm', "BF Dead confirm");
-
-				animation.addByPrefix('deathLoop', "BF Dead Loop", 24, true);
-				animation.addByPrefix('scared', 'BF idle shaking', 24, true);
-
-				playAnim('idle');
-
-				flipX = true;
 			default:
 				var path = Paths.characterFile(curCharacter, isPlayer);
 
+				#if sys
 				if (!FileSystem.exists(path)) {
 					curCharacter = 'bf';
 					path = Paths.characterFile(curCharacter, isPlayer);
 				}
-
-				charData = Json.parse(File.getContent(path));
-
-				switch (charData.atlasType) {
-					case 'packer':
-						frames = Paths.getPackerAtlas(charData.image);
-					case 'sparrow':
-						frames = Paths.getSparrowAtlas(charData.image);
-					default:
-						frames = Paths.getSparrowAtlas(charData.image);
+				#else
+				if (!Assets.exists(path)) {
+					curCharacter = 'bf';
+					path = Paths.characterFile(curCharacter, isPlayer);
 				}
+				#end
 
-				if (charData.camOffset != null && charData.camOffset.length > 0)
-					camOffset = charData.camOffset;
-					
-				healthIcon = (charData.healthIcon != null && charData.healthIcon != '' ? charData.healthIcon : 'face');
-				
-				if (frames != null) {
-					animArray = charData.animations;
+				#if sys
+				if (FileSystem.exists(path))
+					charData = Json.parse(File.getContent(path));
+				#else
+				if (Assets.exists(path))
+					charData = Json.parse(Assets.getText(path));
+				#end
 
-					positionOffset = charData.positionOffset;
+				if (Paths.getContent(path) != null)
+					charData = Json.parse(Paths.getContent(path));
 
-					if (animArray != null && animArray.length > 0) {
-						for (anim in animArray) {
-							if (anim.anim != null && anim.anim != "") {
-								if (anim.indices != null && anim.indices.length > 0)
-									animation.addByIndices(anim.anim, anim.prefix, anim.indices, "", anim.fps, anim.loop, charData.flipX);
-								else
-									animation.addByPrefix(anim.anim, anim.prefix, anim.fps, anim.loop, charData.flipX);
-
-								if (anim.offset != null)
-									addOffset(anim.prefix, anim.offset[0], anim.offset[1]);
-								else
-									addOffset(anim.prefix, 0, 0);
-							}
-						}
+				if (charData != null) {
+					switch (charData.atlasType) {
+						case 'packer':
+							frames = Paths.getPackerAtlas(charData.image);
+						case 'sparrow':
+							frames = Paths.getSparrowAtlas(charData.image);
+						default:
+							frames = Paths.getSparrowAtlas(charData.image);
 					}
 
-					if (charData.scale != 1)
-						setGraphicSize(Std.int(width * charData.scale));
+					if (charData.camOffset != null && charData.camOffset.length > 0)
+						camOffset = charData.camOffset;
+					
+					healthIcon = ((charData.healthIcon != null && charData.healthIcon != '') ? charData.healthIcon : 'face');
+				
+					if (frames != null) {
+						animArray = charData.animations;
 
-					if (charData.deathCharacter != null)
-						deathCharacter = charData.deathCharacter;
+						positionOffset = charData.positionOffset;
 
-					if (charData.deathSound != null)
-						deathSound = charData.deathSound;
+						if (animArray != null && animArray.length > 0) {
+							for (anim in animArray) {
+								if (anim.anim != null && anim.anim != "") {
+									if (anim.indices != null && anim.indices.length > 0)
+										animation.addByIndices(anim.anim, anim.prefix, anim.indices, "", anim.fps, anim.loop, charData.flipX);
+									else
+										animation.addByPrefix(anim.anim, anim.prefix, anim.fps, anim.loop);
 
-					if (charData.noAntialiasing)
-						antialiasing = false;
+									if (anim.offset != null && anim.offset.length > 0)
+										addOffset(anim.anim, anim.offset[0], anim.offset[1]);
+									else
+										addOffset(anim.anim, 0, 0);
+								}
+							}
+
+							flipX = charData.flipX;
+						}
+
+						if (charData.scale != 1)
+							setGraphicSize(Std.int(width * charData.scale));
+
+						if (charData.deathCharacter != null)
+							deathCharacter = charData.deathCharacter;
+
+						if (charData.deathSound != null)
+							deathSound = charData.deathSound;
+
+						if (charData.noAntialiasing)
+							antialiasing = false;
+
+						idleOnBeat = charData.idleOnBeat;
+
+						if (charData.healthColors != null && charData.healthColors.length == 3)
+							healthColors = charData.healthColors;
+
+						if (charData.sing_duration != null)
+							singDuration = charData.sing_duration;
+					}
 					else
-						antialiasing = true;
-
-					idleOnBeat = charData.idleOnBeat;
-
-					if (charData.healthColors != null && charData.healthColors.length == 3)
-						healthColors = charData.healthColors;
-
-					if (charData.sing_duration != null)
-						singDuration = charData.sing_duration;
+						loadDefaultBF();
 				}
-				else {
-					frames = Paths.getSparrowAtlas('characters/BOYFRIEND');
-					quickAnimAdd('idle', 'BF idle dance');
-					quickAnimAdd('singUP', 'BF NOTE UP0');
-					quickAnimAdd('singLEFT', 'BF NOTE LEFT0');
-					quickAnimAdd('singRIGHT', 'BF NOTE RIGHT0');
-					quickAnimAdd('singDOWN', 'BF NOTE DOWN0');
-					quickAnimAdd('singUPmiss', 'BF NOTE UP MISS');
-					quickAnimAdd('singLEFTmiss', 'BF NOTE LEFT MISS');
-					quickAnimAdd('singRIGHTmiss', 'BF NOTE RIGHT MISS');
-					quickAnimAdd('singDOWNmiss', 'BF NOTE DOWN MISS');
-					quickAnimAdd('hey', 'BF HEY');
-					quickAnimAdd('firstDeath', "BF dies");
-					quickAnimAdd('deathConfirm', "BF Dead confirm");
-
-					animation.addByPrefix('deathLoop', "BF Dead Loop", 24, true);
-					animation.addByPrefix('scared', 'BF idle shaking', 24, true);
-
-					playAnim('idle');
-
-					flipX = true;
-				}
+				else
+					loadDefaultBF();
 		}
 
 		if (healthIcon == null)
@@ -246,10 +201,7 @@ class Character extends EngineSprite
 
 		if (idleOnBeat <= 0)
 			idleOnBeat = 1;
-
-		if (antialiasing)
-			antialiasing = PlayerPrefs.antialiasing;
-
+			
 		switch (curCharacter) {
 			case 'pico-speaker':
 				loadMappedAnims();
@@ -257,6 +209,30 @@ class Character extends EngineSprite
 		}
 
 		updateHitbox();
+	}
+
+	public function loadDefaultBF() {
+		frames = Paths.getSparrowAtlas('characters/BOYFRIEND');
+		quickAnimAdd('idle', 'BF idle dance');
+		quickAnimAdd('singUP', 'BF NOTE UP0');
+		quickAnimAdd('singLEFT', 'BF NOTE LEFT0');
+		quickAnimAdd('singRIGHT', 'BF NOTE RIGHT0');
+		quickAnimAdd('singDOWN', 'BF NOTE DOWN0');
+		quickAnimAdd('singUPmiss', 'BF NOTE UP MISS');
+		quickAnimAdd('singLEFTmiss', 'BF NOTE LEFT MISS');
+		quickAnimAdd('singRIGHTmiss', 'BF NOTE RIGHT MISS');
+		quickAnimAdd('singDOWNmiss', 'BF NOTE DOWN MISS');
+		quickAnimAdd('hey', 'BF HEY');
+		quickAnimAdd('firstDeath', "BF dies");
+		quickAnimAdd('deathConfirm', "BF Dead confirm");
+
+		animation.addByPrefix('deathLoop', "BF Dead Loop", 24, true);
+		animation.addByPrefix('scared', 'BF idle shaking', 24, true);
+
+		playAnim('idle');
+
+		flipX = true;
+		trace('default bf');
 	}
 
 	/*
@@ -326,12 +302,12 @@ class Character extends EngineSprite
 					playAnim('danceRight');
 			case 'tankman':
 				if ((animation.curAnim.name == 'singDOWN-alt' || animation.curAnim.name == 'singUP-alt') && !animation.curAnim.finished && animation.curAnim != null)
-					forceNoIdle = false;
+					forceNoIdle = true;
 		}
 
 		if (animation.curAnim != null) {
 			if (animation.curAnim.finished && !forceNoIdle)
-				forceNoIdle = true;
+				forceNoIdle = false;
 		}
 
 		super.update(elapsed);
@@ -387,8 +363,7 @@ class Character extends EngineSprite
 	{
 		super.playAnim(AnimName, Forced, Reversed, Frame);
 
-		if (curCharacter == 'gf')
-		{
+		if (curCharacter == 'gf') {
 			if (AnimName == 'singLEFT') {
 				danced = true;
 			}

@@ -12,72 +12,58 @@ import flixel.tweens.FlxTween;
 import lime.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
+import flixel.FlxCamera;
+import flixel.effects.FlxFlicker;
+#if sys
 import sys.FileSystem;
 import sys.io.File;
-import flixel.FlxCamera;
+#end
 
 import data.*;
 import states.*;
 import gameObjects.*;
 import engine.*;
+import states.StoryMenuState.WeekFile;
 
 using StringTools;
-
-typedef FreeplayData = {
-	var songs:Array<String>;
-	var weekColors:Array<Int>;
-	var difficultys:Array<String>;
-}
 
 typedef SongData = {
 	var hidden:Bool;
 	var song:String;
 	var charIcon:String;
-	var colors:Array<Int>;
-	var hiddenUntilUnlocked:Bool;
+	var weekColors:Array<Int>;
+	var difficultys:Array<String>;
 }
 
 class FreeplayState extends MusicBeatState
 {
-	var songs:Array<SongMetadata> = [];
+	public var songs:Array<SongMetadata> = [];
 	var checkSongs:Array<SongMetadata> = [];
 
-	var selector:FlxText;
-	var curSelected:Int = 0;
-	var curDifficulty:Int = 1;
+	public var selector:FlxText;
+	public var curSelected:Int = 0;
+	public var curDifficulty:Int = 1;
 
-	var scoreText:FlxText;
-	var diffText:FlxText;
-	var lerpScore:Int = 0;
-	var intendedScore:Int = 0;
-	var scoreBG:FlxSprite;
-	var bg:FlxSprite;
-	var intendedColor:FlxColor = FlxColor.WHITE;
-	var colorTween:FlxTween;
-	var songColors:Map<String, Array<Int>> = [];
-	var coolColors:Map<Int, Array<Int>> = [
-		0 => [146, 113, 253],
-		1 => [146, 113, 253],
-		2 => [146, 113, 253],
-		3 => [148, 22, 83],
-		4 => [252, 150, 215],
-		5 => [160, 209, 255],
-		6 => [255, 120, 191],
-	];
-	var jsonList:Array<FreeplayData> = [];
-	var songList:Array<Dynamic> = [];
-	var diffMap:Map<String, Array<String>> = [];
+	public var scoreText:FlxText;
+	public var diffText:FlxText;
+	public var lerpScore:Int = 0;
+	public var intendedScore:Int = 0;
+	public var intendedColor:FlxColor = FlxColor.WHITE;
+	public var scoreBG:FlxSprite;
+	public var bg:FlxSprite;
+	public var colorTween:FlxTween;
 
 	private var grpSongs:FlxTypedGroup<Alphabet>;
 	private var curPlaying:Bool = false;
 
 	private var iconArray:Array<HealthIcon> = [];
 
-	public static var diffArray:Array<String> = ['easy', 'normal', 'hard'];
-	public var pushedSongs:Map<String, Bool>;
+	public var diffArray:Array<String> = ['easy', 'normal', 'hard'];
 	public var camMAIN:FlxCamera;
 
 	public var diff:String = '';
+
+	var weekData:Array<WeekFile> = [];
 
 	override function create()
 	{
@@ -86,72 +72,79 @@ class FreeplayState extends MusicBeatState
 		FlxG.cameras.reset(camMAIN);
 		FlxCamera.defaultCameras = [camMAIN];
 
-		pushedSongs = new Map<String, Bool>();
-		pushedSongs.clear();
+		var directorys:Array<String> = [Paths.getPreloadPath()];
 
-		var directorys:Array<String> = [Paths.mods(), Paths.getPreloadPath()];
+		#if sys
+		directorys.insert(0, Paths.mods());
+		#end
 
-		for (i in 0...directorys.length)
-		{
-			var initSonglist = CoolUtil.coolTextFile(directorys[i] + 'data/freeplaySonglist.txt');
-			var jsonDir:String = directorys[i] + 'freeplay/';
+		#if sys
+		for (i in 0...directorys.length) {
+			var dir:String = directorys[i] + 'weeks/';
 
-			if (initSonglist.length > 0 && initSonglist != null) {
-				for (i in 0...initSonglist.length) {
-					var stuff:Array<String> = initSonglist[i].split(',');
-					songList.push([stuff[0], stuff[2], stuff[3], stuff[1]]);
+			if (FileSystem.isDirectory(dir)) {
+				for (file in FileSystem.readDirectory(dir)) {
+					if (file.endsWith('.json')) {
+						var weekFile:WeekFile = new WeekFile(dir + file);
+
+						if (StoryMenuState.unlockedWeeks.exists(weekFile.weekData))
+							weekFile.weekUnlocked = true;
+
+						weekData.push(weekFile);
+					}
 				}
 			}
+		}
+		#else
+		var weekList:Array<String> = CoolUtil.coolTextFile(Paths.getPreloadPath('weeks/weekList.txt'));
+		for (i in 0...weekList.length) {
+			var file:String = weekList[i];
 
-			if (FileSystem.exists(jsonDir))
-			{
-				for (file in FileSystem.readDirectory(jsonDir))
-				{
-					if (file.endsWith('.json') && !diffMap.exists(jsonFileName(file)))
-					{
-						var jsonData = Json.parse(File.getContent(jsonDir + file));
-						var jsonName = StringTools.replace(file, ".json", "");
-						trace("Trying to load Json: " + file);
+			if (Assets.exists(Paths.getPreloadPath('weeks/$file.json'))) {
+				var weekFile:WeekFile = new WeekFile(Paths.getPreloadPath('weeks/$file.json'));
 
-						if (jsonData != null)
-						{
-							for (i in 0...jsonData.songs.length)
-							{
-								var songData = jsonData.songs[i];
+				if (StoryMenuState.unlockedWeeks.exists(weekFile.weekData) || weekFile.startUnlocked)
+					weekFile.weekUnlocked = true;
 
-								var isUnlocked:Bool = true;
+				if (!weekFile.hiddenFreeplay)
+					weekData.push(weekFile); 
+			}
+		}
+		#end
 
-								if (songData.hiddenUntilUnlocked)
-								{
-									if (Highscore.songBeat(songData.song))
-										isUnlocked = true;
-									else
-										isUnlocked = false;
-								}
+		for (i in 0...weekData.length) {
+			var weekFile:WeekFile = weekData[i];
+			var weekSongs:Array<String> = [];
+			var iconArray:Array<String> = [];
 
-								if (isUnlocked) {
-									if (songData.colors == null)
-										songList.push([songData.song, songData.charIcon, (jsonData.weekColors != null ? jsonData.weekColors : [146, 113, 253])]);
-									else
-										songList.push([songData.song, songData.charIcon, songData.colors]);
-								}
-							}
-						}
+			if (weekFile != null) {
+				for (a in 0...weekFile.songs.length) {
+					var song:Array<Dynamic> = weekFile.songs[a];
+					var freeplayColor:Array<Int> = weekFile.freeplayColor;
+					var weekData:String = weekFile.weekData;
+					var songName:String = song[0];
+					var icon:String = 'bf';
 
-					}
-					else
-						trace('File has an error');
+					if (song[1] != null)
+						icon = song[1];
 
-					for (i in 0...songList.length) {
-						if (songList[i][3] != null)
-							checkSongs.push(new SongMetadata(songList[i][0], songList[i][3], songList[i][1], songList[i][2]));
-						else
-							checkSongs.push(new SongMetadata(songList[i][0], -1, songList[i][1], songList[i][2]));
-					}
+					var difficultys:Array<String> = weekFile.difficultys;
 
+					if (icon == null) icon = 'bf';
 
+					if (weekData == null) weekData = 'week' + i;
+
+					if (freeplayColor == null) freeplayColor = [255, 255, 255];
+
+					if (difficultys == null) difficultys = ['easy', 'normal', 'hard'];
+
+					addSong(songName, weekData, icon, freeplayColor, difficultys);
 				}
 			}
+		}
+
+		if (songs.length <= 0) {
+			addSong('Tutorial', 'tutorial', 'gf', [255, 255, 255], ['easy', 'normal', 'hard']);
 		}
 
 		if (FlxG.sound.music != null) {
@@ -186,11 +179,6 @@ class FreeplayState extends MusicBeatState
 		// LOAD MUSIC
 
 		// LOAD CHARACTERS
-
-		for (i in 0...checkSongs.length) {
-			if (checkSongs[i].songName != null && checkSongs[i].songName != '')
-				songs.push(new SongMetadata(checkSongs[i].songName, checkSongs[i].week, checkSongs[i].songCharacter, checkSongs[i].songColors));
-		}
 
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		add(bg);
@@ -265,24 +253,26 @@ class FreeplayState extends MusicBeatState
 		super.create();
 	}
 
-	public function addSong(songName:String, weekNum:Int, songCharacter:String, colors:Array<Int>)
-	{
-		songs.push(new SongMetadata(songName, weekNum, songCharacter, (colors == null ? [0, 0, 0] : colors)));
+	public function addSong(song:String, weekName:String, songCharacter:String, colors:Array<Int>, difficultys:Array<String>) {
+		songs.push(new SongMetadata(song, weekName, songCharacter, colors, difficultys));
 	}
 
 	public function jsonFileName(jsonName:String):String {
 		return jsonName.replace('.json', '');
 	}
 
-	public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>, ?colors:Array<Int>)
+	public function addWeek(songs:Array<String>, weekName:String, ?songCharacters:Array<String>, ?colors:Array<Int>, ?difficultys:Array<String>)
 	{
-		if (songCharacters == null)
-			songCharacters = ['bf'];
+		if (songCharacters == null) {
+			songCharacters = [];
+
+			for (i in 0...songs.length)
+				songCharacters.push('bf');
+		}
 
 		var num:Int = 0;
-		for (song in songs)
-		{
-			addSong(song, weekNum, songCharacters[num], colors);
+		for (song in songs) {
+			addSong(song, weekName, songCharacters[num], colors, difficultys);
 
 			if (songCharacters.length != 1)
 				num++;
@@ -306,30 +296,42 @@ class FreeplayState extends MusicBeatState
 		scoreText.text = "PERSONAL BEST: " + Math.round(lerpScore);
 		positionHighscore();
 
-		var upP = controls.UI_UP_P;
-		var downP = controls.UI_DOWN_P;
-		var accepted = controls.ACCEPT;
-
-		if (upP)
-		{
+		if (controls.UI_UP_P)
 			changeSelection(-1);
-		}
-		if (downP)
-		{
+
+		if (controls.UI_DOWN_P)
 			changeSelection(1);
-		}
 
 		if (controls.UI_LEFT_P)
 			changeDiff(-1);
 		if (controls.UI_RIGHT_P)
 			changeDiff(1);
 
-		if (controls.BACK) {
-			//FlxG.switchState(new MainMenuState());
+		if (controls.BACK)
+			FlxG.switchState(new MainMenuState());
+
+		if (controls.ACCEPT)
+			loadSong();
+	}
+
+	public function loadSong() {
+		for (i in 0...grpSongs.members.length) {
+			if (i == curSelected)
+				grpSongs.members[i].moveX = false;
+			else
+				grpSongs.members[i].targetY = grpSongs.members[curSelected].targetY + 5; //Make Sure it goes off screen
 		}
 
-		if (accepted)
-		{
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+
+		var oldX:Float = grpSongs.members[curSelected].x;
+		var screenCenteredX:Float = 0;
+		grpSongs.members[curSelected].screenCenter(X);
+		screenCenteredX = grpSongs.members[curSelected].x;
+		grpSongs.members[curSelected].x = oldX;
+
+		FlxTween.tween(grpSongs.members[curSelected], {x: screenCenteredX - 50}, 0.25);
+		FlxFlicker.flicker(grpSongs.members[curSelected], 1, 0.06, true, false, function(flicker:FlxFlicker){
 			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), diff);
 
 			PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
@@ -337,15 +339,13 @@ class FreeplayState extends MusicBeatState
 			PlayState.diffArray = diffArray;
 			PlayState.storyDifficulty = curDifficulty;
 
-			PlayState.storyWeek = songs[curSelected].week;
-			trace('CUR WEEK' + PlayState.storyWeek);
 			if (PlayState.SONG != null)
 				LoadingState.loadAndSwitchState(new PlayState());
 			else {
 				ErrorState.song = songs[curSelected].songName;
 				FlxG.switchState(new ErrorState());
 			}
-		}
+		});
 	}
 
 	function changeDiff(change:Int = 0)
@@ -379,52 +379,11 @@ class FreeplayState extends MusicBeatState
 
 		if (curSelected < 0)
 			curSelected = songs.length - 1;
+
 		if (curSelected >= songs.length)
 			curSelected = 0;
 
-		diffArray = [];
-
-		#if sys
-		var directorys:Array<String> = [Paths.getPreloadPath()];
-
-		#if desktop
-		directorys.push(Paths.mods());
-		#end
-
-		for (dir in 0...directorys.length)
-		{
-			var songPath = directorys[dir] + 'data/' + songs[curSelected].songName + '/';
-
-			if (FileSystem.isDirectory(songPath))
-			{
-				for (file in FileSystem.readDirectory(songPath))
-				{
-					var path = haxe.io.Path.join([songPath, file]);
-					if (file.startsWith(songs[curSelected].songName.toLowerCase()) && file.endsWith('.json'))
-					{
-						var diffToAdd:String = '';
-
-						var songName:String = StringTools.replace(file, '.json', '');
-						diffToAdd = songName;
-
-						diffToAdd = songDiff(diffToAdd);
-
-						if (diffToAdd == songName)
-							diffToAdd = '';
-
-						if (diffToAdd == '')
-							diffToAdd = 'normal';
-
-						if (!diffArray.contains(diffToAdd))
-							if (diffToAdd != songs[curSelected].songName.toLowerCase())
-								diffArray.push(diffToAdd);
-					}
-				}
-			}
-		}
-		#else
-		diffArray = ['EASY', 'NORMAL', 'HARD'];
-		#end
+		diffArray = songs[curSelected].difficultys;
 
 		// selector.y = (70 * curSelected) + 30;
 
@@ -435,8 +394,7 @@ class FreeplayState extends MusicBeatState
 
 		var bullShit:Int = 0;
 
-		for (i in 0...iconArray.length)
-		{
+		for (i in 0...iconArray.length) {
 			iconArray[i].alpha = 0.6;
 		}
 
@@ -462,15 +420,12 @@ class FreeplayState extends MusicBeatState
 		}
 		else
 		{
-			var weekInt:Int = songs[curSelected].week;
-			var cool:FlxColor = FlxColor.WHITE;
-			if (coolColors.exists(weekInt))
-				cool = FlxColor.fromRGB(coolColors.get(weekInt)[0], coolColors.get(weekInt)[1], coolColors.get(weekInt)[2]);
+			var songColors:Array<Int> = songs[curSelected].songColors;
+			var cool:FlxColor = FlxColor.fromRGB(songColors[0], songColors[1], songColors[2]);
 
-			if (cool != intendedColor)
-			{
+			if (cool != intendedColor) {
 				if (colorTween != null)
-					colorTween.cancel;
+					colorTween.cancel();
 
 				intendedColor = cool;
 
@@ -480,6 +435,7 @@ class FreeplayState extends MusicBeatState
 					}
 				});
 			}
+
 		}
 
 		for (item in grpSongs.members)
@@ -519,15 +475,23 @@ class FreeplayState extends MusicBeatState
 class SongMetadata
 {
 	public var songName:String = "";
-	public var week:Int = 0;
+	public var weekName:String = 'default';
 	public var songCharacter:String = "";
 	public var songColors:Array<Int>;
+	public var difficultys:Array<String> = ['easy', 'normal', 'hard'];
 
-	public function new(song:String, week:Int = 0, songCharacter:String, colors:Array<Int>)
+	public function new(song:String, weekName:String, songCharacter:String, colors:Array<Int>, difficultys:Array<String>)
 	{
 		this.songName = song;
-		this.week = week;
+		this.weekName = weekName;
 		this.songCharacter = songCharacter;
 		this.songColors = colors;
+		this.difficultys = difficultys;
+
+		if (colors == null)
+			this.songColors = [255, 255, 255];
+
+		if (difficultys == null)
+			this.difficultys = ['easy', 'normal', 'hard'];
 	}
 }

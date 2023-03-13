@@ -24,6 +24,8 @@ class Alphabet extends FlxSpriteGroup
 	public var optionItem:Bool = false;
 	public var typeSpeed:Float = 0.05;
 	public var inDialogue:Bool = false;
+	public var moveX:Bool = true;
+	public var moveY:Bool = true;
 
 	public var onType:Void -> Void;
 
@@ -259,9 +261,11 @@ class Alphabet extends FlxSpriteGroup
 		{
 			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
 
-			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), CoolUtil.alphaLerp(elapsed * 10));
+			if (moveY)
+				y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), CoolUtil.elapsedLerp(elapsed * 10));
 			
-			x = FlxMath.lerp(x, (targetY * 20) + 90, CoolUtil.alphaLerp(elapsed * 10));
+			if (moveX)
+				x = FlxMath.lerp(x, (targetY * 20) + 90, CoolUtil.elapsedLerp(elapsed * 10));
 		}
 
 		super.update(elapsed);

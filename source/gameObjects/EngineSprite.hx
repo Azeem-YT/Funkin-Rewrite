@@ -7,8 +7,6 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxSort;
 import flixel.graphics.frames.FlxFrame;
-import sys.io.File;
-import sys.FileSystem;
 import openfl.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
@@ -30,9 +28,8 @@ class EngineSprite extends FlxSprite
 		if (animation.getByName(AnimName) != null) {
 			animation.play(AnimName, Force, Reversed, Frame);
 
-			var daOffset = animOffsets.get(AnimName);
-			if (animOffsets.exists(AnimName))
-			{
+			if (animOffsets.exists(AnimName)) {
+				var daOffset = animOffsets.get(AnimName);
 				offset.set(daOffset[0], daOffset[1]);
 			}
 			else

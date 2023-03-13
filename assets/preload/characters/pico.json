@@ -7,9 +7,9 @@
         0
       ],
       "fps": 24,
-      "prefix": "idle",
+      "anim": "idle",
       "indices": [],
-      "anim": "Pico Idle Dance"
+      "prefix": "Pico Idle Dance"
     },
     {
       "loop": false,
@@ -18,9 +18,9 @@
         9
       ],
       "fps": 24,
-      "prefix": "singLEFT",
+      "anim": "singLEFT",
       "indices": [],
-      "anim": "Pico Note Right0"
+      "prefix": "Pico Note Right0"
     },
     {
       "loop": false,
@@ -29,9 +29,9 @@
         -7
       ],
       "fps": 24,
-      "prefix": "singRIGHT",
+      "anim": "singRIGHT",
       "indices": [],
-      "anim": "Pico NOTE LEFT0"
+      "prefix": "Pico NOTE LEFT0"
     },
     {
       "loop": false,
@@ -40,9 +40,9 @@
         41
       ],
       "fps": 24,
-      "prefix": "singRIGHTmiss",
+      "anim": "singRIGHTmiss",
       "indices": [],
-      "anim": "Pico NOTE LEFT miss"
+      "prefix": "Pico NOTE LEFT miss"
     },
     {
       "loop": false,
@@ -51,9 +51,9 @@
         64
       ],
       "fps": 24,
-      "prefix": "singLEFTmiss",
+      "anim": "singLEFTmiss",
       "indices": [],
-      "anim": "Pico Note Right Miss"
+      "prefix": "Pico Note Right Miss"
     },
     {
       "loop": false,
@@ -62,9 +62,9 @@
         27
       ],
       "fps": 24,
-      "prefix": "singUP",
+      "anim": "singUP",
       "indices": [],
-      "anim": "pico Up note0"
+      "prefix": "pico Up note0"
     },
     {
       "loop": false,
@@ -73,9 +73,9 @@
         -70
       ],
       "fps": 24,
-      "prefix": "singDOWN",
+      "anim": "singDOWN",
       "indices": [],
-      "anim": "Pico Down Note0"
+      "prefix": "Pico Down Note0"
     },
     {
       "loop": false,
@@ -84,9 +84,9 @@
         -28
       ],
       "fps": 24,
-      "prefix": "singDOWNmiss",
+      "anim": "singDOWNmiss",
       "indices": [],
-      "anim": "Pico Down Note MISS"
+      "prefix": "Pico Down Note MISS"
     },
     {
       "loop": false,
@@ -95,13 +95,13 @@
         67
       ],
       "fps": 24,
-      "prefix": "singUPmiss",
+      "anim": "singUPmiss",
       "indices": [],
-      "anim": "pico Up note miss"
+      "prefix": "pico Up note miss"
     }
   ],
   "noAntialiasing": false,
-  "framesPath": "characters/Pico_FNF_assetss",
+  "image": "characters/Pico_FNF_assetss",
   "positionOffset": [
     0,
     300

@@ -1,6 +1,7 @@
 package data;
 
 import flixel.FlxG;
+import states.*;
 
 class Highscore
 {
@@ -111,6 +112,9 @@ class Highscore
 		{
 			weekScores = FlxG.save.data.weekScores;
 		}
+
+		if (FlxG.save.data.unlockedWeeks != null)
+			StoryMenuState.unlockedWeeks = FlxG.save.data.unlockedWeeks;
 
 		if (FlxG.save.data.beatenSongs != null)
 			beatenSongs = FlxG.save.data.beatenSongs;

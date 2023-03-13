@@ -6,9 +6,9 @@
         0
       ],
       "loop": false,
-      "prefix": "idle",
+      "anim": "idle",
       "fps": 24,
-      "anim": "Senpai Idle",
+      "prefix": "Senpai Idle",
       "indices": []
     },
     {
@@ -18,9 +18,9 @@
       ],
       "loop": false,
       "fps": 24,
-      "prefix": "singUP",
+      "anim": "singUP",
       "indices": [],
-      "anim": "SENPAI UP NOTE"
+      "prefix": "SENPAI UP NOTE"
     },
     {
       "offset": [
@@ -29,9 +29,9 @@
       ],
       "loop": false,
       "fps": 24,
-      "prefix": "singRIGHT",
+      "anim": "singRIGHT",
       "indices": [],
-      "anim": "SENPAI RIGHT NOTE"
+      "prefix": "SENPAI RIGHT NOTE"
     },
     {
       "offset": [
@@ -40,9 +40,9 @@
       ],
       "loop": false,
       "fps": 24,
-      "prefix": "singLEFT",
+      "anim": "singLEFT",
       "indices": [],
-      "anim": "SENPAI LEFT NOTE"
+      "prefix": "SENPAI LEFT NOTE"
     },
     {
       "offset": [
@@ -51,13 +51,13 @@
       ],
       "loop": false,
       "fps": 24,
-      "prefix": "singDOWN",
+      "anim": "singDOWN",
       "indices": [],
-      "anim": "SENPAI DOWN NOTE"
+      "prefix": "SENPAI DOWN NOTE"
     }
   ],
   "noAntialiasing": true,
-  "framesPath": "characters/senpai",
+  "image": "characters/senpai",
   "positionOffset": [
     200,
     360

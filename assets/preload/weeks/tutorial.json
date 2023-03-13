@@ -1,9 +1,10 @@
 {
   "songs": [
-    "Tutorial"
+    [ "Tutorial", "gf" ]
   ],
   "weekName": "Learn How To Play",
   "weekImg": "week0",
   "startUnlocked": true,
-  "menuChars": ["", "bf", "gf"]
+  "menuChars": [ "", "bf", "gf" ],
+  "freeplayColor": [ 146, 113, 253 ]
 }
