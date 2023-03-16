@@ -47,6 +47,10 @@
 	<define name="PRELOAD_ALL" unless="web" />
 	<define name="NO_PRELOAD_ALL" unless="PRELOAD_ALL"/>
 
+	<define name = "ALLOW_LUA" if= "desktop"/>
+	<define name = "ALLOW_HSCRIPT" if= "desktop"/>
+	<define name = "ALLOW_VIDEOS" if= "desktop"/>
+
 	<section if="PRELOAD_ALL">
 		<library name="songs"    preload="true" />
 		<library name="shared"   preload="true" />
@@ -133,6 +137,7 @@
 	<haxelib name="systools" />
 	<ndll name="systools" haxelib="systools" />
 	<haxelib name="hxCodec" if="desktop" />
+	<haxelib name="flxanimate"/>
 	<haxelib name="hxShaders"/>
 	<haxelib name="flixel-shadertoy-shader-lr" />
 	<!-- <haxelib name="hxcpp-debug-server" if="desktop"/> -->

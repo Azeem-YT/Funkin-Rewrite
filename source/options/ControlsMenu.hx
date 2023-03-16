@@ -24,20 +24,28 @@ class ControlsMenu extends MusicBeatSubstate
 	public var enabled(default, set):Bool = false;
 	public var canExit:Bool = true;
 	static var controlGroups:Array<Array<Control>> = [
-		[NOTE_LEFT, NOTE_DOWN, NOTE_UP, NOTE_RIGHT],
-		[UI_LEFT, UI_DOWN, UI_UP, UI_RIGHT],
-		[]
+
 	];
 
-	static var headerMap:Map<String, String> = [
-		"NOTE_LEFT" => "NOTES_",
-		"NOTE_DOWN" => "NOTES_",
-		"NOTE_UP" => "NOTES_",
-		"NOTE_RIGHT" => "NOTES_",
-		"UI_LEFT" => "UI_",
-		"UI_DOWN" => "UI_",
-		"UI_UP" => "UI_",
-		"UI_RIGHT" => "UI_"
+	static var controlArray:Array<Array<Dynamic>> = [
+		['NOTES', [
+			['LEFT', Control.NOTE_LEFT],
+			['DOWN', Control.NOTE_DOWN],
+			['UP', Control.NOTE_UP],
+			['RIGHT', Control.NOTE_RIGHT],
+		]],
+		['UI', [
+			['LEFT', Control.UI_LEFT],
+			['DOWN', Control.UI_DOWN],
+			['UP', Control.UI_UP],
+			['RIGHT', Control.UI_RIGHT],
+		]],
+		['', [
+			['ACCEPT', Control.ACCEPT],
+			['BACK', Control.BACK],
+			['RESET', Control.RESET],
+			['PAUSE', Control.PAUSE]
+		]]
 	];
 
 	var itemGroups:Array<Array<InputItem>> = [for (i in 0...controlGroups.length) []];
@@ -98,47 +106,29 @@ class ControlsMenu extends MusicBeatSubstate
 		var spacer = 70;
 		var currentHeader:String = null;
 
-		currentHeader = "NOTES_";
-		headers.add(new BoldText(0, y, "NOTES")).screenCenter(X); //Notes first
-		y += spacer;
-
-		var addedHeaders:Map<String, Bool> = new Map<String, Bool>();
-		addedHeaders.set("NOTES", true);
-
-		for (i in 0...controlList.length)
-		{
-			var control = controlList[i];
-			var name = control.getName();
-
-			if (currentHeader != "UI_" && name.indexOf("UI_") == 0)
-			{
-				currentHeader = "UI_";
-				headers.add(new BoldText(0, y, "UI")).screenCenter(X);
-				y += spacer;
-				addedHeaders.set("UI", true);
-			}
-
-			if (currentHeader != null && name.indexOf(currentHeader) == 0)
-				name = name.substr(currentHeader.length);
-
-			var replacedName:String = name.toUpperCase();
-			
-			if (replacedName.contains("NOTE"))
-				replacedName = StringTools.replace(replacedName, "NOTE", "");
-
-			if (replacedName.contains("_"))
-				replacedName = StringTools.replace(replacedName, "_", " ");
-
-			if (replacedName.startsWith(' '))
-				replacedName = StringTools.replace(replacedName, " ", "");
-
-			var label = labels.add(new BoldText(150, y, replacedName));
-			label.alpha = 0.6;
-			for (i in 0...COLUMNS)
-				createItem(label.x + 400 + i * 300, y, control, i);
-
+		for (i in 0...controlArray.length) {
+			trace('loop ' + i);
+			var headerName:String = controlArray[i][0];
+			headers.add(new BoldText(0, y, headerName.toUpperCase() )).screenCenter(X);
+			controlGroups.push([]);
 			y += spacer;
+
+			for (a in 0...controlArray[i][1].length) {
+				var control:Control = controlArray[i][1][a][1];
+				var controlName:String = controlArray[i][1][a][0];
+				controlName = changeUnder(controlName);
+				controlGroups[i].push(control);
+
+				var label = labels.add(new BoldText(150, y, controlName));
+				label.alpha = 0.6;
+				for (i in 0...COLUMNS)
+					createItem(label.x + 400 + i * 300, y, control, i);
+
+				y += spacer;
+			}
 		}
+
+		itemGroups = [for (i in 0...controlGroups.length) []];
 
 		camFollow = new FlxObject(FlxG.width / 2, 0, 70, 70);
 		if (deviceList != null)
@@ -168,11 +158,27 @@ class ControlsMenu extends MusicBeatSubstate
 		add(prompt);
 	}
 
+	function changeUnder(str:String):String {
+		var replacedName:String = str.toUpperCase();
+			
+		if (replacedName.contains("NOTE"))
+			replacedName = StringTools.replace(replacedName, "NOTE", "");
+
+		if (replacedName.contains("_"))
+			replacedName = StringTools.replace(replacedName, "_", " ");
+
+		if (replacedName.startsWith(' '))
+			replacedName = StringTools.replace(replacedName, " ", "");
+
+		str = replacedName;
+
+		return str;
+	}
+
 	function createItem(x = 0.0, y = 0.0, control:Control, index:Int)
 	{
 		var item = new InputItem(x, y, currentDevice, control, index, onSelect);
-		for (i in 0...controlGroups.length)
-		{
+		for (i in 0...itemGroups.length) {
 			if (controlGroups[i].contains(control))
 				itemGroups[i].push(item);
 		}

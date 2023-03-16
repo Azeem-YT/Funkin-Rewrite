@@ -1,4 +1,4 @@
-package;
+package data;
 
 import flixel.*;
 import flixel.math.FlxMath;

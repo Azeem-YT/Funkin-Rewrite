@@ -4,7 +4,7 @@ import data.Section.SwagSection;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
-import timeEvents.Event;
+import mappedEvents.Event;
 
 #if sys
 import sys.io.File;

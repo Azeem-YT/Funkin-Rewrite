@@ -606,13 +606,11 @@ class Controls extends FlxActionSet
 
 	public function fromSaveData(data:Dynamic, device:Device)
 	{
-		for (control in Control.createAll())
-		{
+		for (control in Control.createAll()) {
 			var inputs:Array<Int> = Reflect.field(data, control.getName());
 			if (inputs != null)
 			{
-				switch(device)
-				{
+				switch(device) {
 					case Keys: bindKeys(control, inputs.copy()); 
 					case Gamepad(id): bindButtons(control, id, inputs.copy()); 
 				}

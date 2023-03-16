@@ -52,8 +52,8 @@
   ],
   "healthIcon": "icon-pico",
   "positionOffset": [
-    -100,
-    -150
+    -50,
+    -200
   ],
   "flipX": false
 }

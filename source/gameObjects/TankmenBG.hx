@@ -6,7 +6,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 
 import data.*;
 
-class TankmenBG extends EngineSprite
+class TankmenBG extends FlxSprite
 {
 	public static var animationNotes:Array<Dynamic> = [];
 	private var tankSpeed:Float;
@@ -14,38 +14,36 @@ class TankmenBG extends EngineSprite
 	private var goingRight:Bool;
 	public var strumTime:Float;
 
-	public function new(x:Float, y:Float, facingRight:Bool)
+	public function new(x:Float, y:Float, isGoingRight:Bool)
 	{
 		tankSpeed = 0.7;
-		goingRight = false;
 		strumTime = 0;
-		goingRight = facingRight;
+		goingRight = isGoingRight;
 		super(x, y);
 
 		frames = Paths.getSparrowAtlas('tankmanKilled1', 'week7');
+		antialiasing = true;
 		animation.addByPrefix('run', 'tankman running', 24, true);
 		animation.addByPrefix('shot', 'John Shot ' + FlxG.random.int(1, 2), 24, false);
-		playAnim('run');
-		animation.curAnim.curFrame = FlxG.random.int(0, animation.curAnim.frames.length - 1);
-		antialiasing = true;
 
-		if (goingRight) {
-			addOffset('shot', 300, 200);
-		}
+		animation.play('run');
+		animation.curAnim.curFrame = FlxG.random.int(0, animation.curAnim.numFrames - 1);
 
 		updateHitbox();
-		setGraphicSize(Std.int(0.8 * width));
+
+		setGraphicSize(Std.int(width * 0.8));
 		updateHitbox();
 	}
 
-	public function resetShit(x:Float, y:Float, goingRight:Bool):Void
+	public function resetShit(x:Float, y:Float, isGoingRight:Bool):Void
 	{
-		this.x = x;
-		this.y = y;
-		this.goingRight = goingRight;
+		setPosition(x, y);
+		goingRight = isGoingRight;
 		endingOffset = FlxG.random.float(50, 200);
 		tankSpeed = FlxG.random.float(0.6, 1);
-		flipX = goingRight;
+
+		if (goingRight)
+			flipX = true;
 	}
 
 	override function update(elapsed:Float)
@@ -56,18 +54,26 @@ class TankmenBG extends EngineSprite
 
 		if(animation.curAnim.name == "run")
 		{
-			var speed:Float = (Conductor.songPosition - strumTime) * tankSpeed;
-			if(goingRight)
-				x = (0.02 * FlxG.width - endingOffset) + speed;
-			else
-				x = (0.74 * FlxG.width + endingOffset) - speed;
-		}
-		else if(animation.curAnim.finished)
-		{
-			kill();
+			var endDirection:Float = (FlxG.width * 0.74) + endingOffset;
+
+			if (goingRight) {
+				endDirection = (FlxG.width * 0.02) - endingOffset;
+				x = (endDirection + (Conductor.songPosition - strumTime) * tankSpeed);
+			}
+			else {
+				x = (endDirection - (Conductor.songPosition - strumTime) * tankSpeed);
+			}
 		}
 
-		if(Conductor.songPosition > strumTime)
-			playAnim('shot');
+		if (Conductor.songPosition > strumTime) {
+			animation.play('shot');
+			if (goingRight) {
+				offset.y = 200;
+				offset.x = 300;
+			}
+		}
+
+		if (animation.curAnim.name == 'shot' && animation.curAnim.curFrame >= animation.curAnim.frames.length - 1)
+			kill();
 	}
 }

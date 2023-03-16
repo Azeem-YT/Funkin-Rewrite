@@ -1,4 +1,4 @@
-package timeEvents;
+package mappedEvents;
 
 import flixel.FlxG;
 

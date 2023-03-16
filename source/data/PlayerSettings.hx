@@ -26,8 +26,12 @@ class PlayerSettings
 	{
 		this.id = id;
 		this.controls = new Controls('player$id', None);
+
+		trace('player ' + id);
 				
 		var useDefault = true;
+		//var controlData:FlxSave;
+
 		var controlData = FlxG.save.data.controls;
 		if (controlData != null)
 		{
@@ -37,8 +41,7 @@ class PlayerSettings
 			else if (id == 1 && controlData.p2 != null && controlData.p2.keys != null)
 				keyData = controlData.p2.keys;
 			
-			if (keyData != null)
-			{
+			if (keyData != null) {
 				useDefault = false;
 				trace("loaded key data: " + haxe.Json.stringify(keyData));
 				controls.fromSaveData(keyData, Keys);

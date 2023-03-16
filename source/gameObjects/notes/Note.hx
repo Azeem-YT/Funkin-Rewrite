@@ -10,11 +10,6 @@ import flixel.*;
 import flixel.text.*;
 import flixel.math.*;
 import flixel.graphics.*;
-import haxe.Exception;
-import haxe.ds.StringMap;
-import hscript.Expr;
-import hscript.Interp;
-import hscript.Parser;
 import lime.utils.Assets;
 import flixel.FlxG;
 import helpers.*;
@@ -44,7 +39,6 @@ class Note extends FlxSprite
 
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
-	public var noteType:String = null;
 	public var noAnim:Bool = false;
 	public var modifiedNote:Bool = false;
 	public var isPixelNote:Bool = false;
@@ -62,9 +56,9 @@ class Note extends FlxSprite
 	public var curStyle:String = 'normal';
 	public var isPlayer:Bool = false;
 	public var texture(default, set):String = 'NOTE_assets';
+	public var noteType(default, set):String = 'default';
 
 	//HScript & Lua Stuff
-	public var noteTypePath:String = "";
 	public var noteXOffset:Float = 0;
 	public var noteYOffset:Float = 0;
 	public var healthGain:Float = 0.04;
@@ -76,7 +70,6 @@ class Note extends FlxSprite
 
 	public var daAnims:Array<String> = [];
 	public var isThreePlayerNote:Bool = false;
-	public var noteTypeSet:Bool = false;
 	public var modifiedPos:Bool = false;
 	public var modifiedX:Float = 0;
 	public var playerLane:Int = 1;
@@ -90,6 +83,18 @@ class Note extends FlxSprite
 
 		texture = tex;
 		return tex;
+	}
+
+	inline function set_noteType(type:String) {
+		switch (type) {
+			case 'noAnim':
+				noAnim = true;
+			default:
+				type = 'default';
+		}
+
+		noteType = type;
+		return type;
 	}
 
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?noteType:String = 'none', ?inCharter:Bool = false, ?strumID:Int = 0)
@@ -107,11 +112,10 @@ class Note extends FlxSprite
 		this.mustPress = isPlayer;
 		this.inCharter = inCharter;
 
-		if (noteType != null && noteType != "none" && noteType != "")
+		if (noteType != null && noteType != "default" && noteType != "")
 			this.noteType = noteType;
 		else {
-			this.noteType = 'normal';
-			noteTypeSet = true;
+			this.noteType = 'default';
 		}
 
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
@@ -363,9 +367,7 @@ class Note extends FlxSprite
 		}
 
 		if (tooLate)
-		{
 			if (alpha > 0.3)
 				alpha = 0.3;
-		}
 	}
 }

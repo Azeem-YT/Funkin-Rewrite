@@ -10,6 +10,8 @@ class Timings
 	public var hitWindow:Int = 0;
 	public var score:Int = 350;
 	public var noteSplashes:Bool = true;
+	public var accuracyMod:Float = 1;
+	public var healthMod:Float = 1;
 
 	public function new(rating:String) {
 		this.name = rating;
@@ -18,14 +20,15 @@ class Timings
 	}
 
 	public function getHitWindow() {
-		if (Reflect.getProperty(PlayerPrefs, name + 'Window') != null) {
+		if (Reflect.getProperty(PlayerPrefs, name + 'Window') != null && 
+			Std.isOfType(Reflect.getProperty(PlayerPrefs, name + 'Window'), Float)) {
+
 			hitWindow = Reflect.getProperty(PlayerPrefs, name + 'Window');
 			return;
 		}
 
-		hitWindow = 0;
-		name = 'shit';
-		score = 50;
+		hitWindow = 1000;
+		noteSplashes = false;
 	}
 
 	public function increaseCounter()
