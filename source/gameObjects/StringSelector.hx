@@ -25,23 +25,18 @@ class StringSelector extends FlxSpriteGroup
 {
 	public var menuText:AtlasText;
 	public var alphaText:String = "";
-	public var settingOptions:Array<String> = [];
 	public var selectorRight:FlxSprite;
 	public var selectorLeft:FlxSprite;
 	var selected:Int = 0;
 
-	public function new(x:Float, y:Float, curValue:String, defaultValue:String, className:String = 'OptionPrefs', settingOptions:Array<String>)
+	public function new(x:Float, y:Float, curValue:String, defaultValue:String)
 	{
 		super(x, y);
 
-		if (curValue != '' && curValue != null)
-			alphaText = curValue;
-		else
-			alphaText = defaultValue;
+		if (curValue != '' && curValue != null) alphaText = curValue; else alphaText = defaultValue;
 		
 		menuText = new AtlasText(0, 0, alphaText);
 		add(menuText);
-		this.settingOptions = settingOptions;
 
 		selectorLeft = new FlxSprite(0, 0);
 		selectorLeft.frames = Paths.getSparrowAtlas('campaign_menu_UI_assets');
@@ -61,10 +56,8 @@ class StringSelector extends FlxSpriteGroup
 		visible = true;
 	}
 
-	public function setText(selected:Int = 0){
-		this.selected = selected;
-		menuText.text = settingOptions[this.selected];
-	}
+	public function setText(text:String = 'Default')
+		return menuText.text = text;
 
 	override function update(elapsed:Float) {
 		if (selectorLeft != null) {

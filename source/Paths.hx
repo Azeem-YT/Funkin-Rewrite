@@ -29,6 +29,21 @@ class Paths
 	public static var currentLevel:String = '';
 	public static var SOUND_EXT:String = #if web 'mp3' #else 'ogg'#end;
 
+	#if sys
+	public static var ignoredFolders:Array<String> = [
+		'hscript',
+		'characters',
+		'data', 
+		'images', 
+		'music', 
+		'note_types',
+		'scripts', 
+		'songs',
+		'sounds', 
+		'weeks'
+	];
+	#end
+
 	inline static public function getAssetDirectory(key:String, ?library:String = '', ?type:AssetType = IMAGE) {
 
 		if (library != null && library.length > 1)
@@ -150,11 +165,11 @@ class Paths
 
 	inline static public function characterFile(char:String, ?isPlayer:Bool = false) {
 		#if sys
-		if (isPlayer && FileSystem.exists(mods('characters/$char-player.json')))
-			return mods('characters/$char-player.json');
+		if (isPlayer && FileSystem.exists(modJson('characters/$char-player')))
+			return modJson('characters/$char-player');
 
-		if (FileSystem.exists(mods('characters/$char.json')))
-			return mods('characters/$char.json');
+		if (FileSystem.exists(modJson('characters/$char')))
+			return modJson('characters/$char');
 		#end
 
 		if (isPlayer && Assets.exists(getAssetDirectory('characters/$char-player.json')))
@@ -220,8 +235,8 @@ class Paths
 
 	inline static public function packerTxt(key:String, ?library:String = ''):Any {
 		#if sys
-		if (FileSystem.exists(mods('images/$key.txt')))
-			return File.getContent(mods('images/$key.txt'));
+		if (FileSystem.exists(modTxt('images/$key')))
+			return File.getContent(modTxt('images/$key'));
 		#end
 
 		if (Assets.exists(getAssetDirectory('images/$key.txt', library)))
@@ -246,8 +261,8 @@ class Paths
 		var assetPath:String = getAssetDirectory('images/$key.xml', library);
 
 		#if sys
-		if (FileSystem.exists(mods('images/$key.xml')))
-			return File.getContent('images/$key.xml');
+		if (FileSystem.exists(modXml('images/$key')))
+			return File.getContent(modXml('images/$key'));
 		#end
 
 		if (Assets.exists(assetPath))
@@ -330,8 +345,8 @@ class Paths
 
 	inline static public function video(key:String, ?exten:String = 'mp4') {
 		#if sys
-		if (FileSystem.exists(mods('videos/$key.$exten')))
-			return mods('videos/$key.$exten');
+		if (FileSystem.exists(modVideos(key, exten)))
+			return modVideos('videos/$key.$exten');
 		#end
 
 		return getAssetDirectory('videos/$key.$exten');
@@ -342,24 +357,73 @@ class Paths
 		return ((key == null || key == '') ? 'mods/' : 'mods/$key');
 
 	inline static public function modSounds(key:String)
-		return mods('sounds/$key.$SOUND_EXT');
+		return getModDirectory('sounds/$key.$SOUND_EXT');
 
 	inline static public function modMusic(key:String)
-		return mods('music/$key.$SOUND_EXT');
+		return getModDirectory('music/$key.$SOUND_EXT');
 
 	inline static public function modImages(key:String)
-		return mods('images/$key.png');
+		return getModDirectory('images/$key.png');
 
 	inline static public function modFonts(key:String)
-		return mods('fonts/$key');
+		return getModDirectory('fonts/$key');
 
 	inline static public function modvoices(song:String)
-		return mods('songs/${song.toLowerCase()}/Voices.$SOUND_EXT');
+		return getModDirectory('songs/${song.toLowerCase()}/Voices.$SOUND_EXT');
 
 	inline static public function modinst(song:String)
-		return mods('songs/${song.toLowerCase()}/Inst.$SOUND_EXT');
+		return getModDirectory('songs/${song.toLowerCase()}/Inst.$SOUND_EXT');
+
+	inline static public function modVideos(vid:String, ?exten:String = 'mp4')
+		return getModDirectory('videos/$vid.$exten');
+
+	inline static public function modXml(key:String)
+		return getModDirectory('$key.xml');
+
+	inline static public function modTxt(key:String)
+		return getModDirectory('$key.txt');
+
+	inline static public function modJson(key:String)
+		return getModDirectory('$key.xml');
 
 	inline static public function isModPath(path:String):Bool
 		return path.startsWith('mods/');
+
+	static public function getModDirectory(key:String) {
+		if (currentModDirectory != null && currentModDirectory.length > 0) {
+			var file:String = mods(currentModDirectory + '/$file');
+			if (FileSystem.exists(file))
+				return file;
+		}
+
+		for (mod in foundMods) {
+			var file:String = mods(mod + '/$file');
+			if (FileSystem.exists(file))
+				return file;
+		}
+
+		return mods(key);
+	}
+
+	static public function resetMods() {
+		foundMods = [];
+
+		var foundFolders:Array<String> = [];
+		var directoryFolder:String = mods();
+
+		if (FileSystem.exists(directoryFolder)) {
+			for (folder in FileSystem.readDirectory(directoryFolder)) {
+				var fullPath = haxe.io.Path.join([directoryFolder, folder]);
+				if (FileSystem.isDirectory(fullPath) && !ignoredFolders.contains(folder) && !foundFolders.contains(folder))
+					foundFolders.push(folder);
+			}
+		}
+
+		foundMods = foundFolders;
+		trace(foundMods);
+	}
+
+	public static var foundMods:Array<String> = [];
+	public static var currentModDirectory:String = null;
 	#end
 }

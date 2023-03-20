@@ -57,6 +57,7 @@ class Note extends FlxSprite
 	public var isPlayer:Bool = false;
 	public var texture(default, set):String = 'NOTE_assets';
 	public var noteType(default, set):String = 'default';
+	public var initScale:Float = 1;
 
 	//HScript & Lua Stuff
 	public var noteXOffset:Float = 0;
@@ -194,6 +195,8 @@ class Note extends FlxSprite
 			graphicsSize = Std.int(width * PlayState.daPixelZoom);
 
 		setGraphicSize(graphicsSize);
+
+		initScale = scale.y;
 		 
 		doAnim();
 		updateHitbox();
@@ -330,6 +333,7 @@ class Note extends FlxSprite
 
 	public function resizeScale(speed:Float) {
 		if (isSustainNote && (animation.curAnim != null && !animation.curAnim.name.endsWith('end'))) {
+			scale.y = initScale;
 			scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed;
 			updateHitbox();
 		}

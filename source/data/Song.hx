@@ -17,7 +17,7 @@ typedef SwagSong =
 {
 	var song:String;
 	var notes:Array<SwagSection>;
-	var bpm:Null<Int>;
+	var bpm:Float;
 	var needsVoices:Bool;
 	var speed:Float;
 
@@ -69,7 +69,7 @@ class Song
 		return null;
 	}
 
-	public function loadEvents(folder:String):EventData {
+	public static function loadEvents(folder:String):EventData {
 		var rawJson:String = null;
 
 		rawJson = Paths.getContent(Paths.json('data/' + folder.toLowerCase() + '/events'));
@@ -78,8 +78,13 @@ class Song
 			rawJson = rawJson.substr(0, rawJson.length - 1);
 		}
 
+		var jsonData:EventData = null;
+
 		if (rawJson != null)
-			return cast Json.parse(rawJson);
+			jsonData = cast Json.parse(rawJson);
+
+		if (jsonData != null)
+			return jsonData;
 
 		return null;
 	}

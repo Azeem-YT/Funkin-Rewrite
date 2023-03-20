@@ -87,8 +87,7 @@ class Main extends Sprite
 		});
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, 60, 60, skipSplash, startFullscreen));
-		
-		trace("Starting...");
+		Paths.resetMods();
 	}
 
 	private override function __update(transformOnly:Bool, updateChildren:Bool)

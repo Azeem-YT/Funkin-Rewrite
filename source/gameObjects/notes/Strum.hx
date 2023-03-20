@@ -431,11 +431,11 @@ class Strum extends FlxTypedGroup<FlxBasic>
 		if (strumCharacter == null) {
 			switch (strumID) {
 				case 0:
-					strumCharacter = PlayState.dad;
+					changeCharacter(PlayState.dad);
 				case 1:
-					strumCharacter = PlayState.boyfriend;
+					changeCharacter(PlayState.boyfriend);
 				case 2:
-					strumCharacter = PlayState.gf;
+					changeCharacter(PlayState.gf);
 			}
 		}
 
@@ -491,7 +491,7 @@ class Strum extends FlxTypedGroup<FlxBasic>
 		staticArrow.ID = noteData;
 		staticArrow.x += Note.swagWidth * noteData * (2 / (arrowValue * 2));
 		strums.add(staticArrow);
-		staticArrow.isPlayer = (strumID == playstateInstance.playerLane);
+		staticArrow.isPlayer = (strumID == PlayState.playerLane);
 		staticArrow.originAngle = 0;
 		staticArrow.alphaTo = 1;
 		staticArrow.playAnim('static');
@@ -532,7 +532,7 @@ class Strum extends FlxTypedGroup<FlxBasic>
 		staticArrow.ID = noteData;
 		staticArrow.x += Note.swagWidth * noteData * (2 / (arrowValue * 2));
 		strums.add(staticArrow);
-		staticArrow.isPlayer = (strumID == playstateInstance.playerLane);
+		staticArrow.isPlayer = (strumID == PlayState.playerLane);
 		staticArrow.originAngle = 0;
 		staticArrow.alphaTo = 1;
 		staticArrow.playAnim('static');
@@ -554,6 +554,13 @@ class Strum extends FlxTypedGroup<FlxBasic>
 					default:
 						staticArrow.x += 100;
 				}
+		}
+
+		if (PlayerPrefs.middlescroll) {
+			staticArrow.x = -250;
+
+			if (strumID == PlayState.playerLane)
+				staticArrow.x = 250 + (Note.swagWidth * noteData);
 		}
 
 		staticArrow.initX = staticArrow.x;
@@ -598,20 +605,18 @@ class Strum extends FlxTypedGroup<FlxBasic>
 				else
 					strumCharacter.playAnim(singDirs[noteData], true);
 
-				if (playstateInstance.playerLane != strumID)
+				if (PlayState.playerLane != strumID)
 					strumCharacter.holdTimer = 0;
 			}
 
-			if (doGhost) 
+			if (doGhost && playstateInstance != null) 
 				playstateInstance.doGhost(strumCharacter, singDirs[noteData], isOpponent);
 		}
 	}
 
 	public function changeCharacter(char:Character) {
-		if (strumCharacter != null)
-			strumCharacter.usedOnStrum = false;
-		
-		char.usedOnStrum = true;
+		if (strumCharacter != null) strumCharacter.usedOnStrum = false;
+		if (char != null) char.usedOnStrum = true;
 		strumCharacter = char;
 	}
 

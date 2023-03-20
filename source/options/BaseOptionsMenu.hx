@@ -167,9 +167,9 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 	private function updateSelector(elapsed:Float)
 	{
-		var thePref:OptionPref = settingOptions[curSelected];
+		var curOption:OptionPref = settingOptions[curSelected];
 		
-		switch (thePref.optionType) {
+		switch (curOption.optionType) {
 			case 'int' | 'float':
 				if (controls.UI_LEFT || controls.UI_RIGHT) {
 					/*
@@ -177,14 +177,14 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P);
 
 					if (controls.UI_LEFT_P || controls.UI_RIGHT_P) {
-						switch (thePref.optionType) {
+						switch (curOption.optionType) {
 							case 'int' | 'float':
-								var toAdd:Dynamic = (controls.UI_LEFT ? -thePref.valueToAdd : thePref.valueToAdd);
-								var roundedValue:Dynamic = (thePref.optionType == 'int' ? Math.round(toAdd) : FlxMath.roundDecimal(toAdd, thePref.decimals));
-								var finalValue:Dynamic = thePref.curValue + roundedValue;
+								var toAdd:Dynamic = (controls.UI_LEFT ? -curOption.valueToAdd : curOption.valueToAdd);
+								var roundedValue:Dynamic = (curOption.optionType == 'int' ? Math.round(toAdd) : FlxMath.roundDecimal(toAdd, curOption.decimals));
+								var finalValue:Dynamic = curOption.curValue + roundedValue;
 
-								var roundedMax:Dynamic = (thePref.optionType == 'int' ? Math.round(thePref.maxValue) : FlxMath.roundDecimal(thePref.maxValue, thePref.decimals));
-								var roundedMin:Dynamic = (thePref.optionType == 'int' ? Math.round(thePref.minValue) : FlxMath.roundDecimal(thePref.minValue, thePref.decimals));
+								var roundedMax:Dynamic = (curOption.optionType == 'int' ? Math.round(curOption.maxValue) : FlxMath.roundDecimal(curOption.maxValue, curOption.decimals));
+								var roundedMin:Dynamic = (curOption.optionType == 'int' ? Math.round(curOption.minValue) : FlxMath.roundDecimal(curOption.minValue, curOption.decimals));
 
 								if (finalValue > roundedMax)
 									finalValue = roundedMax;
@@ -192,28 +192,29 @@ class BaseOptionsMenu extends MusicBeatSubstate
 								if (finalValue < roundedMin)
 									finalValue = roundedMin;
 
-								thePref.curValue = finalValue;
-								thePref.selector.setText(Std.string(thePref.curValue));
-								thePref.setValue(thePref.curValue);
+								curOption.curValue = finalValue;
+								curOption.selector.setText(Std.string(curOption.curValue));
+								curOption.setValue(curOption.curValue);
 							case 'string':
 								var change:Int = (controls.UI_LEFT_P ? -1 : 1);
-								thePref.changeSelection(change);
-								thePref.setValue(thePref.optionSelected);
-								trace('string: ' + thePref.getValue());
+								curOption.changeSelection(change);
+								trace('string: ' + curOption.getValue());
 						}
+
+						trace(curOption.optionType);
 					}
 					else {
-						switch (thePref.optionType) {
+						switch (curOption.optionType) {
 							case 'int' | 'float':
 								holdTimer += elapsed;
 
 								if (holdTimer > 0.5) {
-									switch (thePref.optionType) {
+									switch (curOption.optionType) {
 										case 'int':
-											var toAdd:Dynamic = (controls.UI_LEFT ? -thePref.valueToAdd : thePref.valueToAdd);
-											var finalValue:Int = thePref.curValue + Math.round(toAdd);
-											var roundedMax:Int = Math.round(thePref.maxValue);
-											var roundedMin:Int = Math.round(thePref.minValue);
+											var toAdd:Dynamic = (controls.UI_LEFT ? -curOption.valueToAdd : curOption.valueToAdd);
+											var finalValue:Int = curOption.curValue + Math.round(toAdd);
+											var roundedMax:Int = Math.round(curOption.maxValue);
+											var roundedMin:Int = Math.round(curOption.minValue);
 
 											if (finalValue > roundedMax)
 												finalValue = roundedMax;
@@ -221,14 +222,14 @@ class BaseOptionsMenu extends MusicBeatSubstate
 											if (finalValue < roundedMin)
 												finalValue = roundedMin;
 
-											thePref.curValue = finalValue;
-											thePref.selector.setText(Std.string(thePref.curValue));
-											thePref.setValue(thePref.curValue);
+											curOption.curValue = finalValue;
+											curOption.selector.setText(Std.string(curOption.curValue));
+											curOption.setValue(curOption.curValue);
 										case 'float':
-											var toAdd:Dynamic = (controls.UI_LEFT ? -thePref.valueToAdd : thePref.valueToAdd);
-											var finalValue:Float = thePref.curValue + FlxMath.roundDecimal(toAdd, thePref.decimals);
-											var roundedMax:Float = FlxMath.roundDecimal(thePref.maxValue, thePref.decimals);
-											var roundedMin:Float = FlxMath.roundDecimal(thePref.minValue, thePref.decimals);
+											var toAdd:Dynamic = (controls.UI_LEFT ? -curOption.valueToAdd : curOption.valueToAdd);
+											var finalValue:Float = curOption.curValue + FlxMath.roundDecimal(toAdd, curOption.decimals);
+											var roundedMax:Float = FlxMath.roundDecimal(curOption.maxValue, curOption.decimals);
+											var roundedMin:Float = FlxMath.roundDecimal(curOption.minValue, curOption.decimals);
 
 											if (finalValue > roundedMax)
 												finalValue = roundedMax;
@@ -236,15 +237,15 @@ class BaseOptionsMenu extends MusicBeatSubstate
 											if (finalValue < roundedMin)
 												finalValue = roundedMin;
 
-											thePref.curValue = finalValue;
-											thePref.selector.setText(Std.string(thePref.curValue));
-											thePref.setValue(thePref.curValue);
+											curOption.curValue = finalValue;
+											curOption.selector.setText(Std.string(curOption.curValue));
+											curOption.setValue(curOption.curValue);
 									}
 								}
 						}
 					}
 
-					switch (thePref.variableName) {
+					switch (curOption.variableName) {
 						case 'fpsCap':
 							PlayerPrefs.setFramerate();
 					}
@@ -257,21 +258,21 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 	private function updateEnter(elapsed:Float)
 	{
-		var thePref:OptionPref = settingOptions[curSelected];
+		var curOption:OptionPref = settingOptions[curSelected];
 
 		if (controls.ACCEPT){
-			if (thePref.optionType == 'bool') {
-				var curValue:Bool = thePref.getValue();
-				thePref.setValue(!curValue);
-				thePref.changeCheckmark();
+			if (curOption.optionType == 'bool') {
+				var curValue:Bool = curOption.getValue();
+				curOption.setValue(!curValue);
+				curOption.changeCheckmark();
 
-				switch (thePref.variableName) {
+				switch (curOption.variableName) {
 					case 'fpsCounter':
 						Main.setFPSVisible();
 				}
 			}
-			else if (thePref.optionType == 'function') {
-				thePref.enterFunction();
+			else if (curOption.optionType == 'function') {
+				curOption.enterFunction();
 			}
 		}
 	}

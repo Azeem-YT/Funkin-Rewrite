@@ -128,7 +128,7 @@ class HScript
 		interp.variables.set("changePlayerChar", changePlayerChar);
 		interp.variables.set("changeOpponentChar", changeOpponentChar);
 		interp.variables.set("changeGfChar", changeGfChar);
-		interp.variables.set("changeCharacter", PlayState.instance.changeCharacter);
+		interp.variables.set("changeCharacter", PlayState.changeCharacter);
 		interp.variables.set("screenCenterX", screenCenterX);
 		interp.variables.set("screenCenterY", screenCenterY);
 		interp.variables.set("killPlayer", PlayState.instance.killPlayer);
@@ -179,13 +179,13 @@ class HScript
 	}
 
 	public function changePlayerChar(char:String)
-		return PlayState.instance.changeCharacter(char, 0);
+		return PlayState.changeCharacter(char, 0);
 
 	public function changeOpponentChar(char:String)
-		return PlayState.instance.changeCharacter(char, 1);
+		return PlayState.changeCharacter(char, 1);
 
 	public function changeGfChar(char:String)
-		return PlayState.instance.changeCharacter(char, 2);
+		return PlayState.changeCharacter(char, 2);
 
 	public function getInstance():Dynamic
 		return (PlayState.isDead ? GameOverSubstate.instance : PlayState.instance);

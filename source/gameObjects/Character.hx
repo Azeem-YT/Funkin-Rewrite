@@ -74,6 +74,7 @@ class Character extends EngineSprite
 	public var singDuration:Float = 4;
 
 	public var danced:Bool = false;
+	public var specialAnim:Bool = false;
 
 	public var usedOnStrum:Bool = false;
 	public var danceIdle:Bool = false;
@@ -302,12 +303,12 @@ class Character extends EngineSprite
 					playAnim('danceRight');
 			case 'tankman':
 				if ((animation.curAnim.name == 'singDOWN-alt' || animation.curAnim.name == 'singUP-alt') && !animation.curAnim.finished && animation.curAnim != null)
-					forceNoIdle = true;
+					specialAnim = true;
 		}
 
 		if (animation.curAnim != null) {
-			if (animation.curAnim.finished && !forceNoIdle)
-				forceNoIdle = false;
+			if (animation.curAnim.finished && specialAnim)
+				specialAnim = false;
 		}
 
 		super.update(elapsed);
@@ -334,7 +335,7 @@ class Character extends EngineSprite
 
 	public function dance()
 	{
-		if (!debugMode && !forceNoIdle)
+		if (!debugMode && !specialAnim)
 		{
 			if (danceIdle)
 			{
@@ -363,17 +364,18 @@ class Character extends EngineSprite
 	{
 		super.playAnim(AnimName, Forced, Reversed, Frame);
 
-		if (curCharacter == 'gf') {
-			if (AnimName == 'singLEFT') {
-				danced = true;
-			}
-			else if (AnimName == 'singRIGHT') {
-				danced = false;
-			}
+		specialAnim = false;
 
-			if (AnimName == 'singUP' || AnimName == 'singDOWN') {
-				danced = !danced;
-			}
+		switch (curCharacter) {
+			case 'gf':
+				if (AnimName == 'singLEFT')
+					danced = true;
+				else if (AnimName == 'singRIGHT')
+					danced = false;
+
+				if (AnimName == 'singUP' || AnimName == 'singDOWN') {
+					danced = !danced;
+				}
 		}
 	}
 

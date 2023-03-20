@@ -142,7 +142,7 @@ class ControlsMenu extends MusicBeatSubstate
 
 		menuCamera.follow(camFollow, null, 0.06);
 		var margin = 100;
-		menuCamera.deadzone.set(0, margin, menuCamera.width, menuCamera.height - margin * 2);
+		//menuCamera.deadzone.set(0, margin, menuCamera.width, menuCamera.height - margin * 2);
 		menuCamera.minScrollY = 0;
 		controlGrid.onChange.add(function(selected)
 		{

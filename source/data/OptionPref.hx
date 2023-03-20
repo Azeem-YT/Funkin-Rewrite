@@ -13,21 +13,21 @@ class OptionPref
 	public var optionType:String;
 	public var optionName:String;
 	public var curValue:Dynamic = 0;
-	public var curSeleted:Int = 0;
+
 	public var minValue:Dynamic = 0;
 	public var maxValue:Float = 30;
 	public var curSelected:Int = 0;
 	public var optionsArray:Array<String> = [];
 	public var optionSelected:String = '';
+
 	public var valueToAdd:Float = 1;
 	public var enterFunction:Void -> Void;
+
 	public var checkmark:AlphaCheckbox;
 	public var selector:AlphaSelector;
 	public var stringSelector:StringSelector;
-	public var alphaText:Alphabet;
-	public var targetY:Float = 0;
+
 	public var variableName:String;
-	public var text:String = '';
 	public var decimals:Int = 2;
 
 	public function new(variableName:String, optionText:String, optionType:String, defaultValue:Dynamic = null, ?options:Array<String>, ?enterFunc:Void -> Void)
@@ -60,8 +60,9 @@ class OptionPref
 				selector = new AlphaSelector(0, 0, curValue, defaultValue, 'Int');
 			case 'string':
 				optionsArray = options;
-				stringSelector = new StringSelector(0, 0, curValue, defaultValue, optionsArray);
-				stringSelector.setText(curSelected);
+				stringSelector = new StringSelector(0, 0, curValue, defaultValue);
+				if (!Std.isOfType(curValue, String))
+					stringSelector.setText(Std.string(curValue));
 			case 'function':
 				enterFunction = enterFunc;
 		}
@@ -81,7 +82,8 @@ class OptionPref
 			curSelected = 0;
 
 		optionSelected = optionsArray[curSelected];
-		stringSelector.setText(curSelected);
+		stringSelector.setText(optionSelected);
+		setValue(optionSelected);
 	}
 
 	public function getValue():Dynamic {	

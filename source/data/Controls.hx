@@ -181,6 +181,8 @@ class Controls extends FlxActionSet
 			
 		if (scheme == null)
 			scheme = None;
+
+		active = true;
 	}
 
 	override function update()
@@ -616,6 +618,7 @@ class Controls extends FlxActionSet
 				}
 			}
 		}
+
 	}
 	
 	public function createSaveData(device:Device):Dynamic

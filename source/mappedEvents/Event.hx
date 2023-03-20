@@ -4,8 +4,12 @@ import flixel.FlxG;
 
 using StringTools;
 
+typedef EventSection = {
+	var eventsArray:Array<Dynamic>;
+}
+
 typedef EventData = {
-	var events:Array<Dynamic>;
+	var events:Array<EventSection>;
 }
 
 class Event
