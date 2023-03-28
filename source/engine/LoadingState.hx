@@ -154,7 +154,10 @@ class LoadingState extends MusicBeatState
 	
 	static function getNextState(target:FlxState, stopMusic = false):FlxState
 	{
-		//Paths.setCurrentLevel("week" + PlayState.storyWeek);
+		Paths.setCurrentLevel(PlayState.weekName);
+
+		if (Paths.currentLevel == null) Paths.currentLevel = 'week1';
+	
 		#if NO_PRELOAD_ALL
 		var loaded = isSoundLoaded(getSongPath())
 			&& (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath()))

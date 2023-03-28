@@ -147,8 +147,8 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					selector.valueText.x = alphaText.lastSprite.x + (alphaText.lastSprite.width * 2);
 				case 'string':
 					var selector:StringSelector = settingOptions[i].stringSelector;
-					selector.x = alphaText.x - (alphaText.lastSprite.width * 2) / 8;
-					selector.y = alphaText.firstSprite.y - (alphaText.lastSprite.height / 3);
+					selector.x = alphaText.lastSprite.x - (alphaText.lastSprite.width * 2);
+					selector.y = alphaText.firstSprite.y + (alphaText.lastSprite.height / 3);
 			}
 		}
 
@@ -195,13 +195,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 								curOption.curValue = finalValue;
 								curOption.selector.setText(Std.string(curOption.curValue));
 								curOption.setValue(curOption.curValue);
-							case 'string':
-								var change:Int = (controls.UI_LEFT_P ? -1 : 1);
-								curOption.changeSelection(change);
-								trace('string: ' + curOption.getValue());
 						}
-
-						trace(curOption.optionType);
 					}
 					else {
 						switch (curOption.optionType) {
@@ -253,6 +247,12 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				else if (controls.UI_LEFT_R || controls.UI_RIGHT_R) {
 					holdTimer = 0;
 				}
+			case 'string':
+				if (controls.UI_LEFT_P || controls.UI_RIGHT_P) {
+					var change:Int = (controls.UI_LEFT_P ? -1 : 1);
+					curOption.changeSelection(change);
+					trace('string: ' + curOption.getValue());
+				}
 		}
 	}
 
@@ -261,18 +261,18 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		var curOption:OptionPref = settingOptions[curSelected];
 
 		if (controls.ACCEPT){
-			if (curOption.optionType == 'bool') {
-				var curValue:Bool = curOption.getValue();
-				curOption.setValue(!curValue);
-				curOption.changeCheckmark();
+			switch (curOption.optionType) {
+				case 'bool':
+					var curValue:Bool = curOption.getValue();
+					curOption.setValue(!curValue);
+					curOption.changeCheckmark();
 
-				switch (curOption.variableName) {
-					case 'fpsCounter':
-						Main.setFPSVisible();
-				}
-			}
-			else if (curOption.optionType == 'function') {
-				curOption.enterFunction();
+					switch (curOption.variableName) {
+						case 'fpsCounter':
+							Main.setFPSVisible();
+					}
+				case 'function':
+					curOption.enterFunction();
 			}
 		}
 	}

@@ -24,9 +24,11 @@ import openfl.utils.Assets;
 import flixel.math.FlxMath;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.group.FlxSpriteGroup;
 import Type.ValueType;
 import openfl.filters.ShaderFilter;
 import flixel.util.FlxTimer;
+import openfl.filters.BitmapFilter;
 import gameObjects.*;
 import gameObjects.notes.*;
 import engine.*;
@@ -37,6 +39,7 @@ import gameObjects.notes.Strum.StaticArrow;
 
 #if sys
 import FlxRuntimeShader;
+import flash.display.Shader;
 import sys.FileSystem;
 import sys.io.File;
 #end
@@ -50,7 +53,6 @@ class LuaState
 	#end
 	public var isClosed:Bool = false;
 	public var playstate:PlayState;
-	public var existingFuncs:Map<String, Bool>;
 
 	public static var errorStop:Dynamic = 1;
 	public static var stopFunc:Dynamic = 0;
@@ -61,22 +63,15 @@ class LuaState
 	public var hscript:HScript;
 	#end
 
-	public var sentErrors:Map<String, Bool>;
-
 	public function new(luaPath:String) {
-		sentErrors = new Map<String, Bool>();
-
-		if (PlayState.instance != null)
-			playstate = PlayState.instance;
-		else
-			playstate = new PlayState();
+		if (PlayState.instance != null) playstate = PlayState.instance;
+		else playstate = new PlayState();
 
 		#if ALLOW_LUA
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 		Lua.init_callbacks(lua);
 		#end
-		existingFuncs = new Map<String, Bool>();
 
 		#if ALLOW_LUA
 		trace('Trying to load file: $luaPath');
@@ -148,25 +143,39 @@ class LuaState
 		});
 		
 		Lua_helper.add_callback(lua, "setCameraShader", function(obj:String, shaderName:String) {
-			if ((PlayState.playStatecams.exists(obj) && PlayState.playStatecams.get(obj) != null) && PlayState.luaShaders.exists(shaderName)) {
-				var camera:FlxCamera = PlayState.playStatecams.get(obj);
+			if (getLuaCamera(obj) == null) return;
 
-				var shaderArgs:Array<String> = PlayState.luaShaders.get(shaderName);
+			if (!PlayState.luaShaders.exists(shaderName)) initLuaShader(shaderName);
+			if (PlayState.luaShaders.get(shaderName) == null) return;
+
+			var shaderArgs:Array<String> = PlayState.luaShaders.get(shaderName);
+
+			#if sys
+			var camera:Dynamic = getLuaCamera(obj);
+
+			if (Std.isOfType(camera, FlxCamera)) {		
 				var shader:FlxRuntimeShader = new FlxRuntimeShader(shaderArgs[0], shaderArgs[1]);
-				camera.setFilters([new ShaderFilter(shader)]);
-				PlayState.cameraShaders.set(obj, shader);
+				if (shader != null) {
+					var cameraFilter:ShaderFilter = new ShaderFilter(shader);
+					camera.setFilters([cameraFilter]);
+				}
 			}
+			else {
+				var shader:FlxRuntimeShader = new FlxRuntimeShader(shaderArgs[0], shaderArgs[1]);
+				camera.pushShader(shader);
+			}
+			#end
 		});
 		
-		Lua_helper.add_callback(lua, "removeCameraShader", function(obj:String) {
-			if (PlayState.playStatecams.exists(obj) && PlayState.playStatecams.get(obj) != null) {
-				var camera:FlxCamera = PlayState.playStatecams.get(obj);
+		Lua_helper.add_callback(lua, "removeCameraShader", function(name:String) {
+			if (getLuaCamera(name) != null) {
+				var camera:FlxCamera = getLuaCamera(name);
 				camera.setFilters([]);
 			}
 		});
 
 		Lua_helper.add_callback(lua, "makeCamera", function(name:String, x:Int = 0, y:Int = 0, width:Int = 0, height:Int = 0, zoom:Float = 0) {
-			var camera:FlxCamera = new FlxCamera(x, y, width, height, zoom);
+			var camera:LuaCamera = new LuaCamera(name, x, y, width, height, zoom);
 			playstate.addCamera(camera, name);
 		});
 
@@ -190,9 +199,7 @@ class LuaState
 		});
 		
 		Lua_helper.add_callback(lua, "makeGraphic", function(name:String, width:Int, height:Int, color:String) {
-			var realColor:Int = Std.parseInt(color);
-			if (!color.startsWith('0x'))
-				realColor = Std.parseInt('0xff' + color);
+			var realColor:Int = colorFromString(color);
 
 			var sprite:FlxSprite = PlayState.luaSprites.get(name);
 			if (sprite != null) {
@@ -243,19 +250,30 @@ class LuaState
 		Lua_helper.add_callback(lua, "removeSprite", function(name:String, erase:Bool) {
 			removeLuaSprite(name, erase);
 		});
+		
+		Lua_helper.add_callback(lua, "playAnim", function(name:String, forced:Bool) {
+			var sprite:Dynamic = getSprite(name);
+
+			if (sprite != null) {
+				if (Std.isOfType(sprite, LuaSprite))
+					sprite.playAnim(name, forced);
+				else
+					sprite.animation.play(name, forced);
+			}
+		});
 
 		Lua_helper.add_callback(lua, "playMusic", function(sound:String, volume:Float = 1, loop:Bool = false) {
 			FlxG.sound.playMusic(Paths.music(sound), volume, loop);
 		});
 
 		Lua_helper.add_callback(lua, "loadSong", function(song:String, diffNumb:Int = -1) {
-			if (song == null || song.length < 1)
-				song = PlayState.SONG.song;
+			if (song == null || song.length < 1) song = PlayState.SONG.song;
+			if (diffNumb < 0) diffNumb = PlayState.storyDifficulty;
 
-			if (diffNumb == -1)
-				diffNumb = PlayState.storyDifficulty;
+			var diff:String = CoolUtil.difficultyArray[diffNumb];
+			if (diff == null) diff = '';
 
-			var songShit = Highscore.formatSong(song, '');
+			var songShit = Highscore.formatSong(song, diff);
 			PlayState.SONG = Song.loadFromJson(songShit, song);
 			PlayState.storyDifficulty = diffNumb;
 			playstate.persistentUpdate = false;
@@ -270,23 +288,37 @@ class LuaState
 		});
 
 		Lua_helper.add_callback(lua, "getProperty", function(variable:String) {
-			getProperty(variable);
+			var varArray:Array<String> = variable.split('.');
+
+			if (varArray.length > 1) {
+				var object = getObject(varArray[0]);
+
+				for (i in 1...varArray.length - 1)
+					object = Reflect.getProperty(object, varArray[i]);
+
+				return Reflect.getProperty(object, varArray[varArray.length - 1]);
+			}
+				
+			return Reflect.getProperty(playstate, variable);
 		});
 		
 		Lua_helper.add_callback(lua, "setProperty", function(variable:String, value:Dynamic) {
-			setProperty(variable, value);
-		});
+			var varArray:Array<String> = variable.split('.');
 
-		Lua_helper.add_callback(lua, "getPropertyFromObject", function(object:String, variable:String) {
-			getPropertyFromObject(object, variable);
-		});
-		
-		Lua_helper.add_callback(lua, "setPropertyFromObject", function(object:String, variable:String, value:Dynamic) {
-			setPropertyFromObject(object, variable, value);
+			if (varArray.length > 1) {
+				var object = getObject(varArray[0]);
+
+				for (i in 1...varArray.length - 1)
+					object = Reflect.getProperty(object, varArray[i]);
+
+				return Reflect.setProperty(object, varArray[varArray.length - 1], value);
+			}
+
+			return Reflect.setProperty(playstate, variable, value);
 		});
 		
 		Lua_helper.add_callback(lua, "setObjectCamera", function(name:String, cameraName:String) {
-			var sprite:FlxSprite = getSprite(name);
+			var sprite:Dynamic = getObject(name);
 
 			if (sprite != null) {
 				sprite.cameras = [playstate.cameraFromString(cameraName)];
@@ -348,11 +380,35 @@ class LuaState
 			FlxG.openURL(url);
 			#end
 		});
+		
+		Lua_helper.add_callback(lua, "doFunction", function(functionVar:String, args:Array<Dynamic>) {
+			var varArray:Array<String> = functionVar.split('.');
+			var func = Reflect.getProperty(PlayState.instance, functionVar);
 
-		/*
-		Lua_helper.add_callback(lua, "shutdownPC", function(url:String) { //:skull:
-			Sys.command('shutdown /s /t 1');
-		}); */
+			if (varArray.length > 1) {
+				for (i in 1...varArray.length - 1)
+					func = Refelct.getProperty(func, varArray[i]);
+			}
+
+			Reflect.callMethod(null, func, args);
+		});
+
+		Lua_helper.add_callback(lua, "doFunctionFromClass", function(className:String, functionVar:String, args:Array<Dynamic>) {
+			try {
+				var varArray:Array<String> = functionVar.split('.');
+				var func = Reflect.getProperty(Type.resolveClass(className), functionVar);
+
+				if (varArray.length > 1) {
+					for (i in 1...varArray.length - 1)
+						func = Refelct.getProperty(func, varArray[i]);
+				}
+
+				Reflect.callMethod(null, func, args);
+			}
+			catch(e:Dynamic) {
+				trace(e);
+			}
+		});
 
 		Lua_helper.add_callback(lua, "runCode", function(codeToRun:String) {
 			if (codeToRun != null && codeToRun != '') {
@@ -360,10 +416,7 @@ class LuaState
 					hscript.runCode(codeToRun);
 				}
 				catch(e:Dynamic) {
-					if (sentErrors.get(e) == false) {
-						trace(e);
-						sentErrors.set(e, true);
-					}
+					trace(e);
 				}
 			}
 		});
@@ -374,7 +427,7 @@ class LuaState
 			}
 		});
 		
-		Lua_helper.add_callback(lua, "isType", function(variable:Dynamic, type:String) {
+		Lua_helper.add_callback(lua, "isOfType", function(variable:Dynamic, type:String) {
 			try {
 				if (variable != null) {
 					if (Std.isOfType(variable, Type.resolveClass(type)))
@@ -388,12 +441,16 @@ class LuaState
 			return false;
 		});
 
-		Lua_helper.add_callback(lua, "keyPressed", function(name:String) {
-			return Reflect.getProperty(FlxG.keys.justPressed, name);
+		Lua_helper.add_callback(lua, "pressed", function(key:String) {
+			return Reflect.getProperty(FlxG.keys.pressed, key);
+		});
+		
+		Lua_helper.add_callback(lua, "justPressed", function(key:String) {
+			return Reflect.getProperty(FlxG.keys.justPressed, key);
 		});
 
-		Lua_helper.add_callback(lua, "keyReleased", function(name:String){
-			return Reflect.getProperty(FlxG.keys.justReleased, name);
+		Lua_helper.add_callback(lua, "justReleased", function(key:String){
+			return Reflect.getProperty(FlxG.keys.justReleased, key);
 		});
 
 		Lua_helper.add_callback(lua, "getRandom", function(type:String = 'int', min:Dynamic, max:Dynamic){
@@ -524,11 +581,47 @@ class LuaState
 		});
 
 		Lua_helper.add_callback(lua, "getPropertyFromGroup", function(obj:String, index:Int, variable:Dynamic) {
-			getPropertyFromGroup(obj, index, variable);
+			var object:Dynamic = getObject(obj);
+
+			var varArray:Array<String> = variable.split('.');
+
+			if (object == null) {
+				if (Std.isOfType(object, FlxTypedGroup) || Std.isOfType(object, FlxSpriteGroup))
+					return getPropertyFromTypedGroup(object.members[index], variable);
+
+				if (varArray.length > 1) {
+					var what:Dynamic = Reflect.getProperty(object[index], varArray[0]);
+
+					for (i in 1...varArray.length - 1)
+						what = Reflect.getProperty(what, varArray[i]);
+
+					return Reflect.getProperty(what, varArray[varArray.length - 1]);
+				}
+			}
+
+			return Reflect.getProperty(object[index], variable);
 		});
 		
 		Lua_helper.add_callback(lua, "setPropertyFromGroup", function(obj:String, index:Int, variable:Dynamic, value:Dynamic) {
-			setPropertyFromGroup(obj, index, variable, value);
+			var object:Dynamic = getObject(obj);
+
+			var varArray:Array<String> = variable.split('.');
+
+			if (object == null) {
+				if (Std.isOfType(object, FlxTypedGroup) || Std.isOfType(object, FlxSpriteGroup))
+					return setPropertyFromTypedGroup(object.members[index], variable, value);
+
+				if (varArray.length > 1) {
+					var what:Dynamic = Reflect.getProperty(object[index], varArray[0]);
+
+					for (i in 1...varArray.length - 1)
+						what = Reflect.getProperty(what, varArray[i]);
+
+					return Reflect.setProperty(what, varArray[varArray.length - 1], value);
+				}
+			}
+
+			return Reflect.setProperty(object[index], variable, value);
 		});
 		
 		Lua_helper.add_callback(lua, "getPropertyFromClass", function(className:String, variable:String) {
@@ -559,8 +652,8 @@ class LuaState
 			Reflect.setProperty(Type.resolveClass(className), variable, value);
 		});
 				
-		Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
-			Paths.image(name);
+		Lua_helper.add_callback(lua, "precacheImage", function(key:String) {
+			Paths.image(key);
 		});
 		
 		Lua_helper.add_callback(lua, "precacheSound", function(name:String) {
@@ -971,7 +1064,10 @@ class LuaState
 
 	public function getSprite(name):Dynamic {
 		if (PlayState.luaSprites.exists(name)) return PlayState.luaSprites.get(name);
-		return Reflect.getProperty(PlayState, name);
+		if (Std.isOfType(Reflect.getProperty(PlayState, name), FlxSprite) || Std.isOfType(Reflect.getProperty(PlayState, name), LuaSprite))
+			return Reflect.getProperty(PlayState, name);
+
+		return null;
 	}
 
 	public function getShaderObject(name:String):Dynamic {
@@ -984,13 +1080,7 @@ class LuaState
 	}
 
 	public function setObjectScale(name:String, xScale:Float, yScale:Float) {
-		var obj:Dynamic = null;
-
-		if (PlayState.luaSprites.exists(name))
-			obj = PlayState.luaSprites.get(name);
-		else
-			obj = Reflect.getProperty(PlayState, name);
-
+		var obj:Dynamic = getSprite(name);
 		var sprite:FlxSprite = obj;
 
 		if (sprite != null)
@@ -1100,71 +1190,10 @@ class LuaState
 		if (!str.startsWith('0x'))
 			returnColor = Std.parseInt('0xff' + str);
 
+		if (Math.isNaN(returnColor))
+			returnColor = FlxColor.fromString(str);
+
 		return returnColor;
-	}
-
-	public function getProperty(variable:String):Dynamic
-	{
-		var returnVal:Dynamic = null;
-		var varArray:Array<String> = variable.split('.');
-
-		if (varArray.length > 1) {
-			if (PlayState.luaSprites.exists(varArray[0]))
-				returnVal = PlayState.luaSprites.get(varArray[0]);
-			else
-				returnVal = Reflect.getProperty(PlayState, varArray[0]);
-
-			for (i in 1...varArray.length - 1)
-				returnVal = Reflect.getProperty(returnVal, varArray[i]);
-
-			returnVal = Reflect.getProperty(returnVal, varArray[varArray.length - 1]);
-		}
-		else
-			returnVal = Reflect.getProperty(PlayState, variable);
-
-		return returnVal;
-	}
-
-	public function getPropertyFromObject(obj:String, variable:String):Dynamic
-	{
-		var object:Dynamic = null;
-		if (PlayState.luaSprites.exists(object)) object = PlayState.luaSprites.get(obj); else object = getProperty(obj);
-		var returnThing:Dynamic = null;
-		var varArray:Array<String> = variable.split('.');
-
-		if (varArray.length > 1) {
-			object = Reflect.getProperty(object, varArray[0]);
-
-			for (i in 1...varArray.length - 1)
-				object = Reflect.getProperty(object, varArray[i]);
-
-			object = Reflect.getProperty(object, varArray[varArray.length - 1]);
-		}
-		else
-			object = Reflect.getProperty(object, variable);
-
-		returnThing = object;
-
-		return returnThing;
-	}
-	
-	public function setPropertyFromObject(object:String, variable:String, value:Dynamic) {
-		var returnVal:Dynamic = null;
-		var object:Dynamic = null;
-		var varArray:Array<String> = variable.split('.');
-
-		if (PlayState.luaSprites.exists(object)) object = PlayState.luaSprites.get(object); else object = Reflect.getProperty(PlayState, object);
-
-		if (varArray.length > 1) {
-
-			for (i in 1...varArray.length - 1)
-				returnVal = Reflect.getProperty(object, varArray[i]);
-
-			return Reflect.setProperty(object, varArray[varArray.length - 1], value);
-		}
-		else
-			return Reflect.setProperty(PlayState, variable, value);
-
 	}
 
 	public function getStrumNote(strumlane:Int = 0, strumID:Int = 0):StaticArrow {
@@ -1179,92 +1208,39 @@ class LuaState
 
 		return null;
 	}
-	
-	public function getPropertyFromGroup(object:String, index:Int, variable:Dynamic):Dynamic
-	{
-		if (Std.isOfType(Reflect.getProperty(PlayState, object), FlxTypedGroup))
-			return propertyFromGroup(Reflect.getProperty(PlayState, object), variable);
 
-		if (Reflect.getProperty(PlayState, object) == null) {
-			var wtf:Dynamic = Reflect.getProperty(PlayState, object)[index];
-			if (wtf != null) {
-				if(Type.typeof(variable) == ValueType.TInt){
-						return wtf[variable];
-				}
+	public function getPropertyFromTypedGroup(groupObject:Dynamic, variable:String = null) {
+		if (groupObject == null || variable == null)
+			return null;
 
-				return propertyFromGroup(wtf, variable);
-			}
-		}
+		var object:Dynamic = groupObject;
 
-		return null;
-	}
-	
-	public function setPropertyFromGroup(object:Dynamic, index:Int, variable:String, value:String)
-	{
 		var varArray:Array<String> = variable.split('.');
-
-		if (Reflect.getProperty(PlayState, object) == null) {
-			if (Std.isOfType(Reflect.getProperty(PlayState, object), FlxTypedGroup))
-				return spfg(Reflect.getProperty(PlayState, object).members[index], variable, value);
-
-			if (varArray.length > 1) {
-				var what:Dynamic = Reflect.getProperty(object[index], varArray[0]);
-				for (i in 1...varArray.length - 1)
-					what = Reflect.getProperty(what, varArray[i]);
-
-				return Reflect.setProperty(what, varArray[varArray.length - 1], value);
-			}
-		}
-
-		return Reflect.setProperty(object, variable, value);
-	}
-
-	public function spfg(groupObject:Dynamic, variable:String, value:Dynamic) {
-		var varArray:Array<String> = variable.split('.');
-
 		if (varArray.length > 1) {
-			var huh:Dynamic = Reflect.getProperty(groupObject, varArray[0]);
-
 			for (i in 1...varArray.length - 1)
-				huh = Reflect.getProperty(huh, varArray[i]);
+				object = Reflect.getProperty(object, varArray[i]);
 
-			return Reflect.setProperty(huh, varArray[varArray.length - 1], value);
+			return Reflect.getProperty(object, varArray[varArray.length - 1]);
 		}
 
-		return Reflect.setProperty(groupObject, variable, value);
-	}
-	
-	public function propertyFromGroup(groupObject:Dynamic, variable:String) {
-		var varArray:Array<String> = variable.split('.');
-		if (varArray.length > 1) {
-			var what:Dynamic = Reflect.getProperty(groupObject, varArray[0]);
-			for (i in 1...varArray.length - 1)
-				what = Reflect.getProperty(what, varArray[i]);
-
-			return Reflect.getProperty(what, varArray[varArray.length - 1]);
-		}
-
-		return Reflect.getProperty(groupObject, variable);
+		return object.getProperty(object, variable);
 	}
 
-	public function setProperty(variable:String, value:Dynamic) {
-		var returnVal:Dynamic = null;
-		var object:Dynamic = null;
+	public function setPropertyFromTypedGroup(groupObject:Dynamic, variable:String = null, value:Dynamic) {
+		if (groupObject == null || variable == null)
+			return null;
+
+		var object:Dynamic = groupObject;
+
 		var varArray:Array<String> = variable.split('.');
-
 		if (varArray.length > 1) {
-			if (PlayState.luaSprites.exists(varArray[0]))
-				object = PlayState.luaSprites.get(varArray[0]);
-			else
-				object = Reflect.getProperty(PlayState, varArray[0]);
-
 			for (i in 1...varArray.length - 1)
 				object = Reflect.getProperty(object, varArray[i]);
 
 			return Reflect.setProperty(object, varArray[varArray.length - 1], value);
 		}
-		else
-			return Reflect.setProperty(PlayState, variable, value);
+
+		return Reflect.setProperty(object, variable, value);
 	}
 
 	public function getShader(object:String):FlxRuntimeShader {
@@ -1288,31 +1264,20 @@ class LuaState
 		return null;
 	}
 
-	public function playObjAnim(name:String, anim:String, forced:Bool = false) {
-		var sprite:FlxSprite = getSprite(name);
+	public function getObject(name:String):Dynamic {
+		if (PlayState.luaSprites.exists(name)) return PlayState.luaSprites.get(name);
+		if (Reflect.getProperty(playstate, name) != null) return Reflect.getProperty(playstate, name);
+		if (Reflect.getProperty(PlayState, name) != null) return Reflect.getProperty(PlayState, name);
 
-		if (sprite != null) {
-			sprite.animation.play(anim, forced);
-		}
+		return null;
 	}
 
-	public function addLibrary(name:String = '', packageNme:String = '') {
-		#if ALLOW_HSCRIPT
-		if (hscript != null && (name != null && name != '')) {
-			try {
-				var packageStr:String = '';
-				if (packageNme.length > 0) {
-					packageStr = '$packageNme.';
-				}
+	public function getLuaCamera(name:String):Dynamic {
+		if (PlayState.luaCameras.exists(name)) return PlayState.luaCameras.get(name);
+		if (Std.isOfType(Reflect.getProperty(playstate, name), FlxCamera) || Std.isOfType(Reflect.getProperty(playstate, name), LuaCamera))
+			return Reflect.getProperty(playstate, name);
 
-				hscript.interp.variables.set(name, Type.resolveClass(packageStr + name));
-			}
-			catch(e:Dynamic) {
-				Main.loggedErrors.push(hscript.moduleID + ' - ' + Std.string(e));
-				trace(e);
-			}
-		}
-		#end
+		return null;
 	}
 
 	public function easeFromString(ease:String) {
@@ -1417,7 +1382,24 @@ class LuaSprite extends FlxSprite
 	}
 }
 
-class LuaCharacter extends Character
+class LuaCamera extends FlxCamera
 {
-	var isAdded:Bool = false;
+	public var id:String = 'default ID';
+	public var cameraShaders:Array<BitmapFilter> = [];
+
+	public function new(id:String, x:Int, y:Int, width:Int, height:Int, zoom:Float) {
+		super(x, y, width, height, zoom);
+
+		if (id != null) this.id = id;
+	}
+
+	public function pushShader(shader:Shader) { //Class made only for shaders lol
+		var cameraFilter:ShaderFilter = new ShaderFilter(shader);
+		cameraShaders.push(cameraFilter);
+		setFilters(cameraShaders);
+	}
+}
+
+class LuaCharacter extends Character {
+	public var isAdded:Bool = false; //Unsed for now
 }

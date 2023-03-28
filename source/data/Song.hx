@@ -57,7 +57,12 @@ class Song
 		var rawJson:String = null;
 		
 		var pathDirectory = Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase());
-		rawJson = Paths.getContent(pathDirectory);
+
+		#if sys
+		rawJson = File.getContent(pathDirectory);
+		#else
+		rawJson = Assets.getText(pathDirectory);
+		#end
 
 		while (!rawJson.endsWith("}") && rawJson != null) {
 			rawJson = rawJson.substr(0, rawJson.length - 1);

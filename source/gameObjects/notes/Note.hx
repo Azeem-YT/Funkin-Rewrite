@@ -51,6 +51,10 @@ class Note extends FlxSprite
 	public static var BLUE_NOTE:Int = 1;
 	public static var RED_NOTE:Int = 3;
 
+	public var susNotes:Array<Note> = [];
+	public var stopHit:Bool = false;
+	public var ignoreSus(default, set):Bool = false;
+
 	var playerStyle:String;
 	var opponentStyle:String;
 	public var curStyle:String = 'normal';
@@ -195,8 +199,6 @@ class Note extends FlxSprite
 			graphicsSize = Std.int(width * PlayState.daPixelZoom);
 
 		setGraphicSize(graphicsSize);
-
-		initScale = scale.y;
 		 
 		doAnim();
 		updateHitbox();
@@ -226,6 +228,16 @@ class Note extends FlxSprite
 		}
 
 		doAnim();
+	}
+
+	inline public function set_ignoreSus(value:Bool):Bool {
+		for (sus in susNotes) {
+			sus.ignoreNote = value;
+			sus.stopHit = value;
+			sus.noAnim = true;
+		}
+
+		return value;
 	}
 
 	public function loadAnimations(isPixel:Bool = false)
@@ -323,9 +335,8 @@ class Note extends FlxSprite
 							prevNote.animation.play('redhold');
 					}
 
-					prevNote.resizeScale(PlayState.instance.songSpeed);
+					if (!animation.curAnim.name.endsWith('end')) scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed;
 					prevNote.updateHitbox();
-					// prevNote.setGraphicSize();
 				}
 			}
 		}
@@ -333,8 +344,7 @@ class Note extends FlxSprite
 
 	public function resizeScale(speed:Float) {
 		if (isSustainNote && (animation.curAnim != null && !animation.curAnim.name.endsWith('end'))) {
-			scale.y = initScale;
-			scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed;
+			scale.y *= speed / PlayState.instance.songSpeed;
 			updateHitbox();
 		}
 	}

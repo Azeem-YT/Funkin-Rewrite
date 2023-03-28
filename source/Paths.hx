@@ -23,9 +23,10 @@ class Paths
 	public static var modInst:Map<String, Sound> = new Map<String, Sound>();
 	public static var modVoices:Map<String, Sound> = new Map<String, Sound>();
 	public static var loadedSounds:Map<String, Sound> = new Map<String, Sound>();
-	public static var currentSongDir:String = 'assets/songs/tutorial';
+	public static var cachedTexts:Map<String, String> = new Map<String, String>();
 	public static var moddedGraphicsLoaded:Map<String, Bool> = new Map<String, Bool>();
 	public static var graphicIsLoaded:Map<String, Bool> = new Map<String, Bool>();
+	public static var currentSongDir:String = 'assets/songs/tutorial';
 	public static var currentLevel:String = '';
 	public static var SOUND_EXT:String = #if web 'mp3' #else 'ogg'#end;
 
@@ -43,6 +44,10 @@ class Paths
 		'weeks'
 	];
 	#end
+
+	public static function setCurrentLevel(level:String){
+		currentLevel = level;
+	}
 
 	inline static public function getAssetDirectory(key:String, ?library:String = '', ?type:AssetType = IMAGE) {
 
@@ -74,22 +79,38 @@ class Paths
 		return getAssetDirectory(file, library, type);
 	}
 
-	inline static public function txt(key:String, ?library:String) {
+	inline static public function txt(key:String, ?library:String, ?cacheText:Bool = false) {
+		var path:String = getAssetDirectory('$key.txt', library, TEXT);
+
 		#if sys
 		if (FileSystem.exists(mods('$key.txt')))
 			return mods('key.txt');
 		#end
 
-		return getAssetDirectory('$key.txt', library, TEXT);
+		if (cachedTexts.exists(path) && cacheText)
+			return cachedTexts.get(path);
+
+		if (Assets.exists(path) && !cachedTexts.exists(path) && cacheText)
+			cachedTexts.set(path, Assets.getText(path));
+
+		return path;
 	}
 
-	inline static public function xml(key:String, ?library:String) {
+	inline static public function xml(key:String, ?library:String, ?cacheText:Bool = false) {
+		var path:String = getAssetDirectory('$key.xml', library, TEXT);
+
 		#if sys
 		if (FileSystem.exists(mods('$key.xml')))
 			return mods('key.xml');
 		#end
-		
-		return getAssetDirectory('$key.xml', library, TEXT);
+
+		if (cachedTexts.exists(path) && cacheText)
+			return cachedTexts.get(path);
+
+		if (Assets.exists(path) && !cachedTexts.exists(path) && cacheText)
+			cachedTexts.set(path, Assets.getText(path));
+
+		return path;
 	}
 
 	inline static public function lua(key:String, ?library:String) {
@@ -101,13 +122,21 @@ class Paths
 		return getAssetDirectory('$key.lua', library, TEXT);
 	}
 
-	inline static public function json(key:String, ?library:String) {
+	inline static public function json(key:String, ?library:String, ?cacheText:Bool = false) {
+		var path:String = getAssetDirectory('$key.json', library, TEXT);
+
 		#if sys
 		if (FileSystem.exists(mods('$key.json')))
 			return mods('$key.json');
 		#end
 
-		return getAssetDirectory('$key.json', library, TEXT);
+		if (cachedTexts.exists(path) && cacheText)
+			return cachedTexts.get(path);
+
+		if (Assets.exists(path) && !cachedTexts.exists(path) && cacheText)
+			cachedTexts.set(path, Assets.getText(path));
+
+		return path;
 	}
 
 	inline static public function image(key:String, ?library:String = '', ?graphicOnAsset:Bool = false):Any {

@@ -16,26 +16,24 @@ typedef StageData =
 	var dadPos:Array<Float>;
 	var gfPos:Array<Float>;
 	var camZoom:Float;
+	var directory:String;
 	var hidegf:Bool;
 }
 
 class Stage 
 {
+	public static var directory:String = 'tutorial';
+
 	public var boyfriendPos:Array<Float>;
 	public var dadPos:Array<Float>;
 	public var gfPos:Array<Float>;
 	public var camZoom:Float;
 
-	public function new(?curStage:String = '')
-	{
-
-	}
-
 	public static function loadData(curStage:String = 'stage'):StageData
 	{
 		var jsonData = null;
 
-		#if desktop
+		#if sys
 		if (FileSystem.exists(Paths.mods('stages/' + curStage + '/' + curStage + '.json'))) {
 			jsonData = Json.parse(File.getContent(Paths.mods('stages/' + curStage + '/' + curStage + '.json')));
 			trace('Stage Found! ' + Paths.mods('stages/' + curStage + '/' + curStage + '.json'));
@@ -66,6 +64,7 @@ class Stage
 			"dadPos": [100.0, 100.0],
 			"gfPos": [400.0, 130.0],
 			"camZoom": 1.0,
+			"directory": "week1",
 			"hidegf": false
 		};
 
