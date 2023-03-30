@@ -866,9 +866,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		startHscriptOnFolder('stages/');
-		startLuaOnFolder('stages/');
-
 		camPos = new FlxPoint(dad.getGraphicMidpoint().x, dad.getGraphicMidpoint().y);
 
 		add(gfGroup);
@@ -881,9 +878,6 @@ class PlayState extends MusicBeatState
 		switch (gfVersion)
 		{
 			case 'pico-speaker':
-				gf.x -= 50;
-				gf.y -= 200;
-
 				var tempTankman:TankmenBG = new TankmenBG(20, 500, true);
 				tempTankman.strumTime = 10;
 				tempTankman.resetShit(20, 600, true);
@@ -945,8 +939,8 @@ class PlayState extends MusicBeatState
 
 		generateSong(SONG.song);
 
-		startHscriptOnFolder('note_types');
-		startLuaOnFolder('note_types');
+		startHscriptOnFolder('note_types/');
+		startLuaOnFolder('note_types/');
 
 		regenStrums();
 
@@ -1576,8 +1570,6 @@ class PlayState extends MusicBeatState
 					var value2:String = eventNote[3];
 
 					eventArray.push(new Event(strumTime, eventNme, value1, value2));
-
-					trace('$eventNme: $strumTime');
 				}
 			}
 		}
@@ -3279,8 +3271,8 @@ class PlayState extends MusicBeatState
 	}
 
 	public function startHscriptOnFolder(folder:String = null) {
-		if (folder == null)
-			return;
+		if (folder == null) return;
+		if (!folder.endsWith('/')) folder += '/';
 
 		#if (ALLOW_HSCRIPT && sys)
 		var directorys:Array<String> = [Paths.mods(), Paths.getPreloadPath()];
@@ -3308,6 +3300,8 @@ class PlayState extends MusicBeatState
 	}
 
 	public function startLuaOnFolder(folder:String) {
+		if (!folder.endsWith('/')) folder += '/';
+
 		#if (ALLOW_LUA && sys)
 		var directorys:Array<String> = [Paths.mods(folder), Paths.getPreloadPath(folder)];
 

@@ -387,7 +387,7 @@ class LuaState
 
 			if (varArray.length > 1) {
 				for (i in 1...varArray.length - 1)
-					func = Refelct.getProperty(func, varArray[i]);
+					func = Reflect.getProperty(func, varArray[i]);
 			}
 
 			Reflect.callMethod(null, func, args);
@@ -400,7 +400,7 @@ class LuaState
 
 				if (varArray.length > 1) {
 					for (i in 1...varArray.length - 1)
-						func = Refelct.getProperty(func, varArray[i]);
+						func = Reflect.getProperty(func, varArray[i]);
 				}
 
 				Reflect.callMethod(null, func, args);

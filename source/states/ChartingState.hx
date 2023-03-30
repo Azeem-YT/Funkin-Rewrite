@@ -412,7 +412,7 @@ class ChartingState extends MusicBeatState
 			if (FileSystem.exists(path)) {
 				for (luaFile in FileSystem.readDirectory(path))
 					if (luaFile.endsWith('.lua') && !returnVal.contains(luaFile))
-						returnVal.push(luaFile);
+						returnVal.push(StringTools.replace(luaFile, ".lua", ""));
 			}
 		}
 		#end
@@ -430,7 +430,7 @@ class ChartingState extends MusicBeatState
 			if (FileSystem.exists(path)) {
 				for (hscript in FileSystem.readDirectory(path))
 					if (hscript.endsWith('.hxs') && !returnVal.contains(hscript))
-						returnVal.push(hscript);
+						returnVal.push(StringTools.replace(hscript, ".hxs", ""));
 			}
 		}
 		#end

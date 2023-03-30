@@ -94,8 +94,6 @@ class Note extends FlxSprite
 		switch (type) {
 			case 'noAnim':
 				noAnim = true;
-			default:
-				type = 'default';
 		}
 
 		noteType = type;

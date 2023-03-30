@@ -34,20 +34,12 @@ class Stage
 		var jsonData = null;
 
 		#if sys
-		if (FileSystem.exists(Paths.mods('stages/' + curStage + '/' + curStage + '.json'))) {
-			jsonData = Json.parse(File.getContent(Paths.mods('stages/' + curStage + '/' + curStage + '.json')));
-			trace('Stage Found! ' + Paths.mods('stages/' + curStage + '/' + curStage + '.json'));
+		if (FileSystem.exists(Paths.mods('stages/$curStage.json'))) {
+			jsonData = Json.parse(File.getContent(Paths.mods('stages/$curStage.json')));
 		}
-		else if (Assets.exists(Paths.getPreloadPath('stages/$curStage/$curStage.json'))) {
-			jsonData = Json.parse(Assets.getText(Paths.getPreloadPath('stages/$curStage/$curStage.json')));
-			trace('Stage Found! ' + Paths.getPreloadPath('stages/$curStage/$curStage.json'));
+		else #end if (Assets.exists(Paths.getPreloadPath('stages/$curStage.json'))) {
+			jsonData = Json.parse(Assets.getText(Paths.getPreloadPath('stages/$curStage.json')));
 		}
-		#else
-		if (Assets.exists(Paths.getPreloadPath('stages/$curStage/$curStage.json'))) {
-			jsonData = Json.parse(Assets.getText(Paths.getPreloadPath('stages/$curStage/$curStage.json')));
-			trace('Stage Found! ' + Paths.getPreloadPath('stages/$curStage/$curStage.json'));
-		}
-		#end
 
 		if (jsonData == null) {
 			jsonData = loadDefaultData(jsonData);
@@ -64,7 +56,7 @@ class Stage
 			"dadPos": [100.0, 100.0],
 			"gfPos": [400.0, 130.0],
 			"camZoom": 1.0,
-			"directory": "week1",
+			"directory": "tutorial",
 			"hidegf": false
 		};
 

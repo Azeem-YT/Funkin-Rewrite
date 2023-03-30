@@ -34,10 +34,58 @@ typedef SplashData =
 
 typedef ShitData = 
 {
-	var prefix:String;
+	var anim:String;
 	var hasRandom:Bool;
 	var splashFrames:Array<Int>;
 	var fps:Int;
+}
+
+class NoteSplashData //Data for the current note splash data is stored here
+{
+	public static var splashData:SplashData = null;
+	public static var texture:String = 'noteSplashes';
+	public static var splashFrames:Array<Array<Int>> = null;
+	public static var isFrames:Bool = false;
+	public static var splashWidth:Int = 10;
+	public static var splashHeight:Int = 10;
+	public static var xOffset:Float = 10;
+	public static var yOffset:Float = 10;
+
+	public static function reloadJson(tex:String) {
+		if (texture == tex)
+			return;
+
+		var splashTex:String = 'noteSplashes';
+
+		if (tex != null && tex.length > 0) splashTex = tex;
+
+		#if sys
+		if (FileSystem.exists(Paths.json('noteSplashes/' + splashTex))) 
+		#else
+		if (Assets.exists(Paths.json('noteSplashes/' + splashTex)))
+		#end
+		{
+			#if sys
+			splashData = Json.parse(File.getContent(Paths.json('noteSplashes/' + splashTex)));
+			#else
+			splashData = Json.parse(Assets.getText(Paths.json('noteSplashes/' + splashTex)));
+			#end
+
+			if (splashData.useFrames) {
+				splashFrames[0] = splashData.purpleData.splashFrames;
+				splashFrames[1] = splashData.blueData.splashFrames;
+				splashFrames[2] = splashData.greenData.splashFrames;
+				splashFrames[3] = splashData.redData.splashFrames;
+				isFrames = true;
+			}
+
+		}
+		else {
+			splashData = null;
+		}
+
+		texture = splashTex;
+	}
 }
 
 class NoteSplash extends FlxSprite
@@ -53,42 +101,8 @@ class NoteSplash extends FlxSprite
 
 	public function new(x:Float, y:Float = 0, noteData:Int = 0) {
 		super(x, y);
-		var texturePath:String = 'noteSplashes';
-		
-		var splashTex:String = 'noteSplashes';
 
-		if (PlayState.SONG != null)
-			splashTex = PlayState.SONG.splashTexture;
-
-		#if sys
-		if (FileSystem.exists(Paths.json('noteSplashes/' + splashTex))) 
-		#else
-		if (Assets.exists(Paths.json('noteSplashes/' + splashTex)))
-		#end
-		{
-			#if sys
-			splashData = Json.parse(File.getContent(Paths.json('noteSplashes/' + splashTex)));
-			#else
-			splashData = Json.parse(Assets.getText(Paths.json('noteSplashes/' + splashTex)));
-			#end
-
-			texturePath = splashTex;
-
-			if (splashData.useFrames) {
-				splashFrames[0] = splashData.purpleData.splashFrames;
-				splashFrames[1] = splashData.blueData.splashFrames;
-				splashFrames[2] = splashData.greenData.splashFrames;
-				splashFrames[3] = splashData.redData.splashFrames;
-				isFrames = true;
-			}
-
-		}
-		else {
-			splashData = null;
-			texturePath = splashTex;
-		}
-
-		texture = texturePath;
+		texture = NoteSplashData.texture;
 	}
 
 	inline function set_texture(tex:String):String {
@@ -105,8 +119,10 @@ class NoteSplash extends FlxSprite
 			}
 		}
 
-		if (isFrames && splashData != null) {
-			loadGraphic(tex, true, splashData.splashWidth, splashData.splashHeight);
+		NoteSplashData.reloadJson(splashSkin);
+
+		if (NoteSplashData.isFrames) {
+			loadGraphic(tex, true, NoteSplashData.splashWidth, NoteSplashData.splashHeight);
 		}
 		else {
 			frames = Paths.getSparrowAtlas(tex);
@@ -129,7 +145,7 @@ class NoteSplash extends FlxSprite
         setPosition(x - 70, y - 70);
 
         if (splashData != null)
-            offset.set(splashData.xOffset, splashData.yOffset);
+            offset.set(NoteSplashData.xOffset, NoteSplashData.yOffset);
         else
             offset.set(150, 75);
 
@@ -140,7 +156,9 @@ class NoteSplash extends FlxSprite
 	public function addAnimations() {
 		var defaultAnim:String = 'note splash ';
 
-		if (splashData != null) {
+		if (NoteSplashData.splashData != null) {
+			var splashData:SplashData = NoteSplashData.splashData;
+
 			if (isFrames) {
 				animation.add('note0', splashFrames[0], splashData.purpleData.fps, false);
 				animation.add('note1', splashFrames[1], splashData.blueData.fps, false);
@@ -166,7 +184,7 @@ class NoteSplash extends FlxSprite
 
 					if (splashShit != null) {
 						if (splashShit.hasRandom) {
-							var splitShit:Array<String> = splashShit.prefix.split('split');
+							var splitShit:Array<String> = splashShit.anim.split('split');
 
 							var firstAnim:String = splitShit[0];
 							var secondAnim:String = '';
@@ -175,10 +193,11 @@ class NoteSplash extends FlxSprite
 								secondAnim = splitShit[1];
 
 							var animToAdd:String = firstAnim + FlxG.random.int(1, 2) + secondAnim;
-							animation.addByPrefix('note' + i, animToAdd, splashShit.fps, false);
+							for (i in 1...2)
+								animation.addByPrefix('note' + i, animToAdd, splashShit.fps, false);
 						}
 						else
-							animation.addByPrefix('note' + i, splashShit.prefix, splashShit.fps, false);
+							animation.addByPrefix('note' + i, splashShit.anim, splashShit.fps, false);
 					}
 					else
 						animation.addByPrefix('note' + i, defaultAnim + splashDirs[i], splashShit.fps, false);
@@ -203,8 +222,7 @@ class NoteSplash extends FlxSprite
 		if(animation.curAnim != null && animation.curAnim.finished)
                 kill();
 
-		if (animation.curAnim == null)
-			kill();
+		if (frames == null || animation.curAnim == null) kill();
 
 		super.update(elapsed);
 	}
