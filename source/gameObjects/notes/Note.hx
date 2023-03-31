@@ -333,7 +333,7 @@ class Note extends FlxSprite
 							prevNote.animation.play('redhold');
 					}
 
-					if (!animation.curAnim.name.endsWith('end')) scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed;
+					prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed;
 					prevNote.updateHitbox();
 				}
 			}

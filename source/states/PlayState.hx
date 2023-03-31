@@ -2731,7 +2731,7 @@ class PlayState extends MusicBeatState
 					if (playerStrum.strumCharacter != null && 
 						playerStrum.strumCharacter.animation.curAnim.name.startsWith('sing')) {
 						note.canGhost = true;
-						note.ignoreSus = true;
+						//note.ignoreSus = true;
 					}
 				}
 			}

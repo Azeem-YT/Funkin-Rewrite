@@ -37,7 +37,6 @@ typedef ShitData =
 	var anim:String;
 	var hasRandom:Bool;
 	var splashFrames:Array<Int>;
-	var fps:Int;
 }
 
 class NoteSplashData //Data for the current note splash data is stored here
@@ -147,69 +146,68 @@ class NoteSplash extends FlxSprite
         if (splashData != null)
             offset.set(NoteSplashData.xOffset, NoteSplashData.yOffset);
         else
-            offset.set(150, 75);
+            offset.set(10, 10);
 
 		alpha = 0.6;
-        playAnim('note' + noteData);
+		var animToPlay:String = 'note$noteData-' + FlxG.random.int(1, 2);
+        playAnim(animToPlay);
     }
 
 	public function addAnimations() {
-		var defaultAnim:String = 'note splash ';
-
-		if (NoteSplashData.splashData != null) {
+		for (i in 0...4) {
 			var splashData:SplashData = NoteSplashData.splashData;
-
-			if (isFrames) {
-				animation.add('note0', splashFrames[0], splashData.purpleData.fps, false);
-				animation.add('note1', splashFrames[1], splashData.blueData.fps, false);
-				animation.add('note2', splashFrames[2], splashData.greenData.fps, false);
-				animation.add('note3', splashFrames[3], splashData.redData.fps, false);
-			}
-			else {
-				for (i in 0...4) {
-					var splashShit:ShitData = null;
-
-					switch (i) {
-						case 0:
-							splashShit = splashData.purpleData;
-						case 1:
-							splashShit = splashData.blueData;
-						case 2:
-							splashShit = splashData.greenData;
-						case 3:
-							splashShit = splashData.redData;
-						default:
-							splashShit = splashData.purpleData;
+			for (a in 1...3) {
+				trace(a);
+				var defaultAnim:String = 'note impact ' + a + ' ' + splashDirs[i];
+				trace(defaultAnim);
+				if (splashData != null)	{
+					if (NoteSplashData.isFrames) {
+						animation.add('note$i-' + a, splashFrames[i], 24, false);
 					}
+					else  {
+						var splashAnim:ShitData = null;
+						switch (i) {
+							case 0:
+								splashAnim = splashData.purpleData;
+							case 1:
+								splashAnim = splashData.blueData;
+							case 2:
+								splashAnim = splashData.greenData;
+							case 3:
+								splashAnim = splashData.redData;
+							default:
+								splashAnim = splashData.purpleData;
+						}
 
-					if (splashShit != null) {
-						if (splashShit.hasRandom) {
-							var splitShit:Array<String> = splashShit.anim.split('split');
+						if (splashAnim != null) {
+							if (splashAnim.hasRandom) {
+								var splitShit:Array<String> = splashAnim.anim.split("$split$");
 
-							var firstAnim:String = splitShit[0];
-							var secondAnim:String = '';
+								var firstAnim:String = splitShit[0];
+								var secondAnim:String = '';
 
-							if (splitShit[1] != null)
-								secondAnim = splitShit[1];
+								if (splitShit[1] != null) {
+									secondAnim = splitShit[1];
 
-							var animToAdd:String = firstAnim + FlxG.random.int(1, 2) + secondAnim;
-							for (i in 1...2)
-								animation.addByPrefix('note' + i, animToAdd, splashShit.fps, false);
+									var animToAdd:String = firstAnim + a + secondAnim;
+									for (i in 1...2)
+										animation.addByPrefix('note$i-' + a, animToAdd, 24, false);
+								}
+								else
+									animation.addByPrefix('note$i-' + a, splashAnim.anim, 24, false);
+							}
+							else
+								animation.addByPrefix('note$i-' + a, defaultAnim, 24, false);
+
 						}
 						else
-							animation.addByPrefix('note' + i, splashShit.anim, splashShit.fps, false);
-					}
-					else
-						animation.addByPrefix('note' + i, defaultAnim + splashDirs[i], splashShit.fps, false);
-				}
+							animation.addByPrefix('note$i-' + a, defaultAnim, 24, false);
 
+					}
+				}
+				else
+					animation.addByPrefix('note$i-' + a, defaultAnim, 24, false);
 			}
-		}
-		else {
-			animation.addByPrefix('note0', defaultAnim + 'purple', 24, false);
-            animation.addByPrefix('note1', defaultAnim + 'blue', 24, false);
-            animation.addByPrefix('note2', defaultAnim + 'green', 24, false);
-            animation.addByPrefix('note3', defaultAnim + 'red', 24, false);
 		}
 
 		antialiasing = PlayerPrefs.antialiasing;
