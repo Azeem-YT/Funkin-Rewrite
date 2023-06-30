@@ -16,6 +16,12 @@ import lime.app.Application;
 import states.*;
 import data.*;
 
+#if sys
+import modding.*;
+import sys.FileSystem;
+import sys.io.File;
+#end
+
 class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
@@ -24,10 +30,13 @@ class Main extends Sprite
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false;
+	public static var game:FlxGame;
 	public static var currentState:String = 'TitleState';
 	public static var gotFPS:Bool = false;
 	public static var fpsCap:Float = 60;
-	public static var loggedErrors:Array<String> = [];
+	#if ALLOW_HSCRIPT
+	public static var stateScript:HScript;
+	#end
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -79,15 +88,28 @@ class Main extends Sprite
 		#end
 
 		FlxG.signals.preStateSwitch.add(function(){
+			stateScript = null;
 			Paths.destroyImages();
 		});
 
 		FlxG.signals.postStateSwitch.add(function(){
-			currentState = Std.string(Type.getClass(FlxG.state));
+			var fullState:String = Std.string(Type.getClass(FlxG.state));
+			var cutArray:Array<String> = fullState.split('.');
+
+			currentState = cutArray[cutArray.length - 1];
+			
+			#if (ALLOW_HSCRIPT && sys)
+			if (currentState != "ModState" && FileSystem.exists(Paths.stateDirectory(currentState))) {
+				stateScript = new HScript(Paths.stateDirectory(currentState));
+				stateScript.setInstance(FlxG.state);
+			}
+			#end
+
+			if (currentState == "ModState") currentState = ModState.stateName;
 		});
 
-		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, 60, 60, skipSplash, startFullscreen));
-		Paths.resetMods();
+		game = new FlxGame(gameWidth, gameHeight, initialState, zoom, 60, 60, skipSplash, startFullscreen);
+		addChild(game);
 	}
 
 	private override function __update(transformOnly:Bool, updateChildren:Bool)
@@ -104,6 +126,14 @@ class Main extends Sprite
 			gotFPS = true;
 		}
 	}
+
+	#if sys
+	public static function switchModState(name:String) {
+		if (!FileSystem.exists(Paths.stateDirectory(name))) return;
+		ModState.stateName = name;
+		FlxG.switchState(new ModState());
+	}
+	#end
 
 	public static function setFPSVisible() {
 		if (framerateCounter != null)

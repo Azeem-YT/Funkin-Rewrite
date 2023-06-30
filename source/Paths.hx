@@ -25,7 +25,7 @@ class Paths
 	public static var loadedSounds:Map<String, Sound> = new Map<String, Sound>();
 	public static var cachedTexts:Map<String, String> = new Map<String, String>();
 	public static var moddedGraphicsLoaded:Map<String, Bool> = new Map<String, Bool>();
-	public static var graphicIsLoaded:Map<String, Bool> = new Map<String, Bool>();
+	public static var graphicsLoaded:Map<String, Bool> = new Map<String, Bool>();
 	public static var currentSongDir:String = 'assets/songs/tutorial';
 	public static var currentLevel:String = '';
 	public static var SOUND_EXT:String = #if web 'mp3' #else 'ogg'#end;
@@ -302,11 +302,15 @@ class Paths
 
 	inline static public function hscript(key:String, ?library:String) {	
 		#if sys
-		if (FileSystem.exists(mods('$key.hxs')))
-			return mods('$key.hxs');
+		if (FileSystem.exists(mods('$key.hx')))
+			return mods('$key.hx');
 		#end
 
-		return getAssetDirectory('$key.hxs', library);
+		return getAssetDirectory('$key.hx', library);
+	}
+
+	inline static public function stateDirectory(stateName:String) {
+		return mods('states/$stateName/$stateName.hx');
 	}
 
 	inline static public function getImage(key:String, ?library:String = '', ?graphicOnAsset:Bool = false):FlxGraphic
@@ -321,7 +325,7 @@ class Paths
 				var graphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, key);
 				graphic.persist = true;
 				FlxG.bitmap.addGraphic(graphic);
-				graphicIsLoaded.set(key, true);
+				graphicsLoaded.set(key, true);
 			}
 
 			if (FlxG.bitmap.get(key) != null) {
@@ -331,12 +335,12 @@ class Paths
 		#end
 		
 		if ((Assets.exists(imagePth(key, library)) && graphic == null) && graphicOnAsset) {
-			if (!graphicIsLoaded.exists(key)) {
+			if (!graphicsLoaded.exists(key)) {
 				var bitmap:BitmapData = BitmapData.fromFile(imagePth(key, library));
 				var graphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, key);
 				graphic.persist = true;
 				FlxG.bitmap.addGraphic(graphic);
-				graphicIsLoaded.set(key, true);
+				graphicsLoaded.set(key, true);
 			}
 
 			if (FlxG.bitmap.get(key) != null) {
@@ -358,7 +362,7 @@ class Paths
 				}
 			}
 
-			for (image in graphicIsLoaded.keys()) {
+			for (image in graphicsLoaded.keys()) {
 				var graphic:FlxGraphic = FlxG.bitmap.get(image);
 				if (graphic != null) {
 					FlxG.bitmap.removeByKey(image);
@@ -368,7 +372,7 @@ class Paths
 			}
 
 			moddedGraphicsLoaded.clear();
-			graphicIsLoaded.clear();
+			graphicsLoaded.clear();
 		}
 	}
 
@@ -386,73 +390,37 @@ class Paths
 		return ((key == null || key == '') ? 'mods/' : 'mods/$key');
 
 	inline static public function modSounds(key:String)
-		return getModDirectory('sounds/$key.$SOUND_EXT');
+		return mods('sounds/$key.$SOUND_EXT');
 
 	inline static public function modMusic(key:String)
-		return getModDirectory('music/$key.$SOUND_EXT');
+		return mods('music/$key.$SOUND_EXT');
 
 	inline static public function modImages(key:String)
-		return getModDirectory('images/$key.png');
+		return mods('images/$key.png');
 
 	inline static public function modFonts(key:String)
-		return getModDirectory('fonts/$key');
+		return mods('fonts/$key');
 
 	inline static public function modvoices(song:String)
-		return getModDirectory('songs/${song.toLowerCase()}/Voices.$SOUND_EXT');
+		return mods('songs/${song.toLowerCase()}/Voices.$SOUND_EXT');
 
 	inline static public function modinst(song:String)
-		return getModDirectory('songs/${song.toLowerCase()}/Inst.$SOUND_EXT');
+		return mods('songs/${song.toLowerCase()}/Inst.$SOUND_EXT');
 
 	inline static public function modVideos(vid:String, ?exten:String = 'mp4')
-		return getModDirectory('videos/$vid.$exten');
+		return mods('videos/$vid.$exten');
 
 	inline static public function modXml(key:String)
-		return getModDirectory('$key.xml');
+		return mods('$key.xml');
 
 	inline static public function modTxt(key:String)
-		return getModDirectory('$key.txt');
+		return mods('$key.txt');
 
 	inline static public function modJson(key:String)
-		return getModDirectory('$key.xml');
+		return mods('$key.xml');
 
 	inline static public function isModPath(path:String):Bool
 		return path.startsWith('mods/');
 
-	static public function getModDirectory(key:String) {
-		if (currentModDirectory != null && currentModDirectory.length > 0) {
-			var file:String = mods(currentModDirectory + '/$file');
-			if (FileSystem.exists(file))
-				return file;
-		}
-
-		for (mod in foundMods) {
-			var file:String = mods(mod + '/$file');
-			if (FileSystem.exists(file))
-				return file;
-		}
-
-		return mods(key);
-	}
-
-	static public function resetMods() {
-		foundMods = [];
-
-		var foundFolders:Array<String> = [];
-		var directoryFolder:String = mods();
-
-		if (FileSystem.exists(directoryFolder)) {
-			for (folder in FileSystem.readDirectory(directoryFolder)) {
-				var fullPath = haxe.io.Path.join([directoryFolder, folder]);
-				if (FileSystem.isDirectory(fullPath) && !ignoredFolders.contains(folder) && !foundFolders.contains(folder))
-					foundFolders.push(folder);
-			}
-		}
-
-		foundMods = foundFolders;
-		trace(foundMods);
-	}
-
-	public static var foundMods:Array<String> = [];
-	public static var currentModDirectory:String = null;
 	#end
 }

@@ -157,9 +157,7 @@ class NoteSplash extends FlxSprite
 		for (i in 0...4) {
 			var splashData:SplashData = NoteSplashData.splashData;
 			for (a in 1...3) {
-				trace(a);
 				var defaultAnim:String = 'note impact ' + a + ' ' + splashDirs[i];
-				trace(defaultAnim);
 				if (splashData != null)	{
 					if (NoteSplashData.isFrames) {
 						animation.add('note$i-' + a, splashFrames[i], 24, false);

@@ -107,14 +107,7 @@ class PlayState extends MusicBeatState
 	#if sys
 	public static var cameraShaders:Map<String, FlxRuntimeShader> = new Map<String, FlxRuntimeShader>();
 	#end
-
-	public static var boyfriendX:Float = 770;
-	public static var boyfriendY:Float = 450;
-	public static var gfX:Float = 400;
-	public static var gfY:Float = 130;
-	public static var dadX:Float = 100;
-	public static var dadY:Float = 100;
-
+	
 	public static var positionMap:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 
 	public static var bfChars:Map<String, Boyfriend> = new Map<String, Boyfriend>();
@@ -313,6 +306,7 @@ class PlayState extends MusicBeatState
 		bfChars.clear();
 		gfChars.clear();
 		dadChars.clear();
+		positionMap.clear();
 
 		#if ALLOW_LUA
 		luaSprites.clear();
@@ -2306,7 +2300,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (curStage.startsWith('school'))
-			rating.loadGraphic(Paths.image('ratings/$pixelShitPart1/${daRating.name}$pixelShitPart2', 'shared'));
+			rating.loadGraphic(Paths.image('ratings/$pixelShitPart1${daRating.name}$pixelShitPart2', 'shared'));
 		else
 			rating.loadGraphic(Paths.image('ratings/${daRating.name}', 'shared'));
 		rating.cameras = [camHUD];
@@ -2728,11 +2722,8 @@ class PlayState extends MusicBeatState
 
 			if (lastNoteHit != null) {
 				if (!lastNoteHit.isSustainNote && lastNoteHit.strumTime == note.strumTime) {
-					if (playerStrum.strumCharacter != null && 
-						playerStrum.strumCharacter.animation.curAnim.name.startsWith('sing')) {
-						note.canGhost = true;
-						//note.ignoreSus = true;
-					}
+					note.canGhost = true;
+					//note.ignoreSus = true;
 				}
 			}
 
@@ -3292,7 +3283,7 @@ class PlayState extends MusicBeatState
 
 	public function startHscript(path:String) {
 		#if ALLOW_HSCRIPT
-		if (path.endsWith('.hxs')) {
+		if (path.endsWith('.hx')) {
 			var hscript:HScript = new HScript(path);
 			hscriptArray.push(hscript);
 		}

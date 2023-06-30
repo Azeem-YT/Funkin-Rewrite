@@ -82,8 +82,7 @@ class LuaState
 			#if windows
 			lime.app.Application.current.window.alert(error, "Error on lua script!");
 			#end
-			lua = null;
-			isClosed = true;
+			close();
 			return;
 		}
 		#end
@@ -93,10 +92,11 @@ class LuaState
 		#end
 
 		var luaSplit:Array<String> = luaPath.split('/');
-		scriptName = luaSplit[luaSplit.length - 1];
-		scriptName.replace('.lua', '');
+		scriptName = luaSplit[luaSplit.length - 1].substr(0, luaSplit[luaSplit.length - 1].length - 4);
 
+		#if ALLOW_HSCRIPT
 		hscript.moduleID = "Lua Script: $scriptName";
+		#end
 
 		setVar('curBPM', Conductor.bpm);
 		setVar('scrollSpeed', PlayState.SONG.speed);
@@ -411,6 +411,7 @@ class LuaState
 		});
 
 		Lua_helper.add_callback(lua, "runCode", function(codeToRun:String) {
+			#if ALLOW_HSCRIPT
 			if (codeToRun != null && codeToRun != '') {
 				try {
 					hscript.runCode(codeToRun);
@@ -419,12 +420,15 @@ class LuaState
 					trace(e);
 				}
 			}
+			#end
 		});
 		
 		Lua_helper.add_callback(lua, "addLibrary", function(name:String = null, packageNme:String = '') {
+			#if ALLOW_HSCRIPT
 			if (hscript != null) {
 				hscript.addLibrary(name, packageNme);
 			}
+			#end
 		});
 		
 		Lua_helper.add_callback(lua, "isOfType", function(variable:Dynamic, type:String) {
@@ -908,7 +912,6 @@ class LuaState
 			return returnValue;
 		}
 		catch (e:Dynamic) {
-			Main.loggedErrors.push(Std.string(e));
 			trace(e);
 		}
 		#end
@@ -1344,10 +1347,7 @@ class LuaState
 
 	public function close() {
 		#if ALLOW_LUA
-		if (lua == null)
-			return;
-
-		Lua.close(lua);
+		if (lua != null) Lua.close(lua);
 		lua = null;
 		isClosed = true;
 		#end

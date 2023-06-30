@@ -54,6 +54,8 @@ class HScript
 	public var isAlive:Bool = true;
 	public var moduleID:String = null;
 
+	public var instance:FlxState;
+
 	public function new(path:String)
 	{
 		var hxsFile:String = '';
@@ -99,6 +101,7 @@ class HScript
 		interp.variables.set("FlxTypedSpriteGroup", FlxTypedSpriteGroup);
 		interp.variables.set("FlxCamera", FlxCamera);
 		interp.variables.set("FlxPoint", FlxPoint);
+		interp.variables.set("FlxAxes", flixel.util.FlxAxes);
 		interp.variables.set("FlxAnimate", flxanimate.FlxAnimate);
 		interp.variables.set("Song", Song);
 		interp.variables.set("Strum", Strum);
@@ -109,39 +112,15 @@ class HScript
 		interp.variables.set("Reflect", Reflect);
 		interp.variables.set("Math", Math);
 		interp.variables.set("BGSprite", BGSprite);
-		interp.variables.set("Bool", Bool);
-		interp.variables.set("String", String);
-		interp.variables.set("Float", Float);
-		interp.variables.set("Int", Int);
 		interp.variables.set("Array", Array);
 		interp.variables.set("HScript", HScript);
 		interp.variables.set("Parser", Parser);
 		interp.variables.set("Main", Main);
-		interp.variables.set("setSpriteBlend", setSpriteBlend);
-		interp.variables.set("flashCamera", flashCamera);
 		interp.variables.set("playSound", FlxG.sound.play);
-		interp.variables.set("add", PlayState.instance.add);
-		interp.variables.set("remove", PlayState.instance.remove);
-		interp.variables.set("boyfriend", PlayState.boyfriend);
-		interp.variables.set("dad", PlayState.dad);
-		interp.variables.set("gf", PlayState.gf);
-		interp.variables.set("changePlayerChar", changePlayerChar);
-		interp.variables.set("changeOpponentChar", changeOpponentChar);
-		interp.variables.set("changeGfChar", changeGfChar);
-		interp.variables.set("changeCharacter", PlayState.changeCharacter);
-		interp.variables.set("screenCenterX", screenCenterX);
-		interp.variables.set("screenCenterY", screenCenterY);
-		interp.variables.set("killPlayer", PlayState.instance.killPlayer);
-		interp.variables.set("screenCenterX", screenCenterX);
-		interp.variables.set("setTextBorderStyle", setTextBorderStyle);
-		interp.variables.set("setCamBGColorAlpha", setCamBGColorAlpha);
-
 		interp.variables.set("trace", traceText);
-		interp.variables.set("setColor", setColor);
-		interp.variables.set("returnColor", returnColor);
-		interp.variables.set("instance", this);
 
 		setInstance();
+
 		#if sys
 		interp.variables.set("File", File);
 		interp.variables.set("FileSystem", FileSystem);
@@ -166,7 +145,7 @@ class HScript
 				interp.execute(contents);
 			}
 			catch(e:Dynamic) {
-				Main.loggedErrors.push(moduleID + ' - ' + Std.string(e));
+				trace(e);
 				exit();
 			}
 		}
@@ -178,22 +157,19 @@ class HScript
 		#end
 	}
 
-	public function changePlayerChar(char:String)
-		return PlayState.changeCharacter(char, 0);
-
-	public function changeOpponentChar(char:String)
-		return PlayState.changeCharacter(char, 1);
-
-	public function changeGfChar(char:String)
-		return PlayState.changeCharacter(char, 2);
 
 	public function getInstance():Dynamic
-		return (PlayState.isDead ? GameOverSubstate.instance : PlayState.instance);
+		return instance;
 
-	public function setInstance() {
-		var gameInstance = getInstance();
+	public function setInstance(?state:FlxState) {
+		var gameInstance:FlxState = state;
+		if (gameInstance == null) gameInstance = FlxG.state;
+		instance = gameInstance;
 		#if ALLOW_HSCRIPT
-		return interp.variables.set("game", gameInstance);
+		interp.variables.set("add", instance.add);
+		interp.variables.set("remove", instance.remove);
+		interp.variables.set("game", gameInstance);
+		interp.variables.set("instance", gameInstance);
 		#end
 	}
 
@@ -230,7 +206,6 @@ class HScript
 				interp.variables.set(lib, Type.resolveClass(packageStr + lib));
 			}
 			catch(e:Dynamic) {
-				Main.loggedErrors.push(moduleID + ' - ' + Std.string(e));
 				trace(e);
 			}
 		}
@@ -242,64 +217,29 @@ class HScript
 		return (isAlive ? interp.variables.exists(field) : false);
 	#end
 
-	public function screenCenterX(obj:FlxObject)
-		return obj.screenCenter(X);
-
-	public function screenCenterY(obj:FlxObject)
-		return obj.screenCenter(Y);
-
-	public function setCamBGColorAlpha(daCam:FlxCamera, value:Int = 0)
-		return daCam.bgColor.alpha = value;
-
 	public function traceText(text:Dynamic)
 		return trace(text);
 
-	public function returnColor(color:String = 'BLACK'):FlxColor {
-		var colorVal:FlxColor = FlxColor.fromString(color);
+	public function getAbstract(className:String, libPackage:String, variable:String):Dynamic {
+		if (className == null || className == '') return null;
 
-		return colorVal;
-	}
-
-	public function setTextBorderStyle(text:FlxText, style:String = 'OUTLINE', color:String = '0', size:Float = 1, quality:Float = 1)
-	{
-		var textStyle:FlxTextBorderStyle;
-		var textColor:FlxColor = FlxColor.fromString(color);
-
-		switch (style.toLowerCase())
-		{
-			case 'outline':
-				textStyle = OUTLINE;
-			case 'none':
-				textStyle = NONE;
-			case 'outline_fast':
-				textStyle = OUTLINE_FAST;
-			case 'shadow':
-				textStyle = SHADOW;
-			default:
-				textStyle = NONE;
+		var packageStr:String = '';
+		if (libPackage.length > 0) {
+			packageStr = '$libPackage.';
 		}
 
-		text.setBorderStyle(textStyle, textColor, size, quality);
-	}
+		var classVariable:Dynamic = null;
 
-	public function setSpriteBlend(t:FlxSprite, blend:String) {
-		if (t != null)
-			t.blend = blendFromString(blend);
-	}
+		try {
+			 classVariable = Reflect.getProperty(Type.getClass(packageStr + className), variable);
+		}
+		catch(e:Dynamic) {
+			trace(e);
 
-	public function flashCamera(cam:String = 'camGame', color:String = 'WHITE', duration:Float = 1, ?onComplete:() -> Void, ?forced:Bool = false) {
-		if (PlayState.playStatecams != null) {
-			if (!PlayState.playStatecams.exists(cam))
-				FlxG.camera.flash(FlxColor.fromString(color), duration, onComplete, forced);
-			else
-			{
-				if (PlayState.playStatecams.get(cam) != null)
-					PlayState.playStatecams.get(cam).flash(FlxColor.fromString(color), duration, onComplete, forced);
-				else
-					FlxG.camera.flash(FlxColor.fromString(color), duration, onComplete, forced);
-			}
+			classVariable = null;
 		}
 
+		return classVariable;
 	}
 
 	public function blendFromString(blend:String):BlendMode {
@@ -322,17 +262,10 @@ class HScript
 		return NORMAL;
 	}
 
-	public function setColor(sprite:FlxSprite, colorString:String = '', ?rgb:Array<Int>) {
-		if (rgb.length > 0 && rgb != null)
-			sprite.color = FlxColor.fromRGB(rgb[0], rgb[1], rgb[2]);
-		else
-			sprite.color = FlxColor.fromString(colorString);
-	}
-
 	public function setNameFromPath(text:String = '') {
 		if (text != null && text != '') {
 			var splitPath:Array<String> = text.split('/');
-			var killMeNow:String = StringTools.replace(splitPath[splitPath.length - 1], ".hxs", "");
+			var killMeNow:String = StringTools.replace(splitPath[splitPath.length - 1], ".hx", "");
 			moduleID = killMeNow;
 		}
 		else 

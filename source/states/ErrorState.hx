@@ -22,7 +22,6 @@ class ErrorState extends MusicBeatState
 		add(displayText);
 
 		errorText = 'HEY! A error occured with the song json!\n Press ENTER to return to the menu or Press C to \ngo to the Charting State';
-		Main.loggedErrors.push('Error on Loading song - $song');
 	}
 
 	override function update(elapsed:Float)
