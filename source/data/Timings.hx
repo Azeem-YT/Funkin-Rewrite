@@ -8,7 +8,7 @@ class Timings
 	public var imageName:String = 'sick';
 	public var name:String = 'sick';
 	public var hitWindow:Int = 0;
-	public var score:Int = 350;
+	public var score:Int = 500;
 	public var noteSplashes:Bool = true;
 	public var accuracyMod:Float = 1;
 	public var healthMod:Float = 1;
@@ -32,5 +32,5 @@ class Timings
 	}
 
 	public function increaseCounter()
-		return Reflect.setProperty(PlayState, name + 's', Reflect.getProperty(PlayState, name + 's') + 1);
+		return Reflect.setProperty(PlayState.instance, name + 's', Reflect.getProperty(PlayState.instance, name + 's') + 1);
 }

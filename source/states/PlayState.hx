@@ -161,10 +161,12 @@ class PlayState extends MusicBeatState
 	public var health:Float = 1;
 	public var combo:Int = 0;
 	public var sicks:Int = 0;
+	public var marvelouss:Int = 0;
 	public var goods:Int = 0;
 	public var bads:Int = 0;
 	public var shits:Int = 0;
 	public var misses:Int = 0;
+	public var ratingFolder:String = 'default';
 	public var zoomSpeed:Int = 4;
 
 	public static var timingData:Array<Timings> = [];
@@ -431,7 +433,10 @@ class PlayState extends MusicBeatState
 		positionMap.set('boyfriend', stageData.boyfriendPos);
 		positionMap.set('gf', stageData.gfPos);
 		positionMap.set('dad', stageData.dadPos);
+		ratingFolder = stageData.ratingFolder;
 		defaultCamZoom = stageData.camZoom;
+
+		if (ratingFolder == null || ratingFolder == '') ratingFolder = 'default';
 
 		boyfriendGroup = new FlxSpriteGroup(positionMap.get('boyfriend')[0], positionMap.get('boyfriend')[1]);
 		dadGroup = new FlxSpriteGroup(positionMap.get('dad')[0], positionMap.get('dad')[1]);
@@ -1046,7 +1051,15 @@ class PlayState extends MusicBeatState
 			gf.visible = false;
 		}
 
-		timingData.push(new Timings('sick'));
+		if (PlayerPrefs.marvelousRating)
+			timingData.push(new Timings('marvelous'));
+
+		var sickRating:Timings = new Timings('sick');
+		sickRating.noteSplashes = true;
+		sickRating.score = 350;
+		sickRating.accuracyMod = 1;
+		sickRating.healthMod = 1;
+		timingData.push(sickRating);
 		
 		var goodRating:Timings = new Timings('good');
 		goodRating.noteSplashes = false;
@@ -1059,7 +1072,7 @@ class PlayState extends MusicBeatState
 		badRating.noteSplashes = false;
 		badRating.score = 50;
 		badRating.accuracyMod = 0.5;
-		badRating.healthMod = 0.5;
+		badRating.healthMod = -0.5;
 		timingData.push(badRating);
 
 		var shitRating:Timings = new Timings('shit');
@@ -1124,7 +1137,7 @@ class PlayState extends MusicBeatState
 
 	public function startPosition(char:Character, isGF:Bool = false) {
 		if (isGF && dad.curCharacter.startsWith('gf')) {
-			char.setPosition(gfX, gfY);
+			char.setPosition(getPosition('gf', 0), getPosition('gf', 1));
 			char.scrollFactor.set(0.95, 0.95);
 		}
 
@@ -2294,15 +2307,7 @@ class PlayState extends MusicBeatState
 		var pixelShitPart1:String = "";
 		var pixelShitPart2:String = '';
 
-		if (curStage.startsWith('school')) {
-			pixelShitPart1 = 'pixelUI/';
-			pixelShitPart2 = '-pixel';
-		}
-
-		if (curStage.startsWith('school'))
-			rating.loadGraphic(Paths.image('ratings/$pixelShitPart1${daRating.name}$pixelShitPart2', 'shared'));
-		else
-			rating.loadGraphic(Paths.image('ratings/${daRating.name}', 'shared'));
+		rating.loadGraphic(Paths.image('ratings/$ratingFolder/${daRating.name}'));
 		rating.cameras = [camHUD];
 		rating.screenCenter();
 		rating.x = coolText.x - 50;
@@ -2311,21 +2316,13 @@ class PlayState extends MusicBeatState
 		rating.velocity.y -= FlxG.random.int(140, 175);
 		rating.velocity.x -= FlxG.random.int(0, 10);
 
-		if (curStage.startsWith('school'))
-			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.7));
-		else
-			rating.setGraphicSize(Std.int(rating.width * 0.7));
+		if (ratingFolder == 'pixel') rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.7));
+		else rating.setGraphicSize(Std.int(rating.width * 0.7));
 
-		if (curStage.startsWith('school'))
-			rating.antialiasing = false;
-		else
-			rating.antialiasing = PlayerPrefs.antialiasing;
+		rating.antialiasing = PlayerPrefs.antialiasing;
 
 		var comboSpr:FlxSprite = new FlxSprite();
-		if (curStage.startsWith('school'))
-			comboSpr.loadGraphic(Paths.image('ratings/$pixelShitPart1/combo$pixelShitPart2', 'shared'));
-		else
-			comboSpr.loadGraphic(Paths.image('ratings/combo', 'shared'));
+		comboSpr.loadGraphic(Paths.image('ratings/$ratingFolder/combo'));
 		comboSpr.cameras = [camHUD];
 		comboSpr.screenCenter();
 		comboSpr.x = coolText.x;
@@ -2334,13 +2331,11 @@ class PlayState extends MusicBeatState
 		comboSpr.antialiasing = PlayerPrefs.antialiasing;
 
 		comboSpr.velocity.x += FlxG.random.int(1, 10);
-		if (curStage.startsWith('school'))
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.7));
-		else
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
+		if (ratingFolder == 'pixel') comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.7));
+		else comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
 		add(rating);
 
-		if (curStage.startsWith('school')) {
+		if (ratingFolder == 'pixel') {
 			rating.antialiasing = false;
 			comboSpr.antialiasing = false;
 		}
@@ -2357,20 +2352,17 @@ class PlayState extends MusicBeatState
 		var daLoop:Int = 0;
 		for (i in seperatedScore)
 		{
-			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image('ratings/' + pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2, "shared"));
+			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image( 'ratings/$ratingFolder/num' + Std.int(i) ));
 			numScore.cameras = [camHUD];
 			numScore.screenCenter();
 			numScore.x = coolText.x +  (43 * daLoop) - 90;
 			numScore.y += 80;
 
-			if (!curStage.startsWith('school'))
-			{
+			if (ratingFolder == 'pixel')
+				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
+			else {
 				numScore.antialiasing = PlayerPrefs.antialiasing;
 				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
-			}
-			else
-			{
-				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
 			}
 			numScore.updateHitbox();
 
@@ -2382,8 +2374,7 @@ class PlayState extends MusicBeatState
 				add(numScore);
 
 			FlxTween.tween(numScore, {alpha: 0}, 0.2, {
-				onComplete: function(tween:FlxTween)
-				{
+				onComplete: function(tween:FlxTween) {
 					numScore.destroy();
 				},
 				startDelay: Conductor.crochet * 0.002
@@ -2418,7 +2409,7 @@ class PlayState extends MusicBeatState
 	public var ratingAccuracy:Float = 0.00;
 
 	public function updateScore() {
-		var ratingRankStr:String = '';
+		var ratingRankStr:String = '?';
 		var ratingText:String = '?';
 
 		if (totalNotesHit < 1)
@@ -2436,7 +2427,7 @@ class PlayState extends MusicBeatState
 		if (sicks > 0 && (goods == 0 && bads == 0 && shits == 0 && misses == 0)) ratingText = 'PFC';
 		else if (goods > 0 && (bads == 0 && shits == 0 && misses == 0)) ratingText = 'GFC';
 		else if ((bads > 0 || shits > 0) && misses == 0) ratingText = 'FC';
-		else if (misses > 1 && misses < 10) ratingText = 'SDCB';
+		else if (misses >= 1 && misses < 10) ratingText = 'SDCB';
 		else if (misses > 10) ratingText = 'CLEAR';
 
 		hudGroup.scoreTxt.text = 'Score: $songScore | Misses: $misses | Accuracy: ' + Std.string(FlxMath.roundDecimal(calculatedAccuracy * 100, 2)) + '% [$ratingText] | Rank: $ratingRankStr';

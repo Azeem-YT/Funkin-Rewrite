@@ -84,6 +84,14 @@ class Preferences extends BaseOptionsMenu
 		pushOption(option);
 
 		var option:OptionPref = new OptionPref(
+			'marvelousRating', 
+			"Marvelous Rating",
+			'bool',
+			true
+		);
+		pushOption(option);
+
+		var option:OptionPref = new OptionPref(
 			'timeType', 
 			"Time Bar Type",
 			'string',

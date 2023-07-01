@@ -29,7 +29,9 @@ class PlayerPrefs
 	public static var noteOffset:Float = 0;
 	public static var persistentCache:Bool = false;
 	public static var noteColors:Array<Float> = [1, 1, 1, 1];
+	public static var marvelousRating:Bool = true;
 
+	public static var marvelousWindow:Int = 20;
 	public static var sickWindow:Int = 40;
 	public static var goodWindow:Int = 90;
 	public static var badWindow:Int = 140;

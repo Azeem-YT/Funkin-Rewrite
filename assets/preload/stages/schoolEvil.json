@@ -1,6 +1,7 @@
 {
-	"boyfriendPos": [970, 450],
-	"dadPos": [100, 100],
+	"boyfriendPos": [ 970, 450 ],
+	"dadPos": [ 100, 100 ],
 	"gfPos": [ 400, 130 ],
+	"ratingFolder": "pixel",
 	"camZoom": 1
 }

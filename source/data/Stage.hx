@@ -17,6 +17,7 @@ typedef StageData =
 	var gfPos:Array<Float>;
 	var camZoom:Float;
 	var directory:String;
+	var ratingFolder:String;
 	var hidegf:Bool;
 }
 
@@ -57,6 +58,7 @@ class Stage
 			"gfPos": [400.0, 130.0],
 			"camZoom": 1.0,
 			"directory": "tutorial",
+			"ratingFolder": "default",
 			"hidegf": false
 		};
 
