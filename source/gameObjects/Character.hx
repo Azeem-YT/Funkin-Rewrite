@@ -86,13 +86,9 @@ class Character extends EngineSprite
 	public var deathCharacter:String = 'bf';
 	public var deathSound:String = null;
 
-	public var ghostGroup:FlxSpriteGroup;
-
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
 	{
 		super(x, y);
-
-		ghostGroup = new FlxSpriteGroup(0, 0);
 
 		curCharacter = character;
 		this.isPlayer = isPlayer;
@@ -279,28 +275,7 @@ class Character extends EngineSprite
 			}
 		}
 
-		switch (curCharacter)
-		{
-			case 'pico-speaker':
-					forceNoIdle = true;
-
-					if(animationNotes.length > 0 && Conductor.songPosition >= animationNotes[0][0])
-					{
-						var noteData:Int = 1;
-						if(animationNotes[0][1] > 2) 
-							noteData = 3;
-
-						noteData += FlxG.random.int(0, 1);
-						playAnim('shoot' + noteData, true);
-						animationNotes.shift();
-					}
-
-					if (animation.curAnim != null)
-						if (animation.curAnim.finished) 
-							playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - 3);
-			case 'gf':
-				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished && animation.curAnim != null)
-					playAnim('danceRight');
+		switch (curCharacter) {
 			case 'tankman':
 				if ((animation.curAnim.name == 'singDOWN-alt' || animation.curAnim.name == 'singUP-alt') && !animation.curAnim.finished && animation.curAnim != null)
 					specialAnim = true;

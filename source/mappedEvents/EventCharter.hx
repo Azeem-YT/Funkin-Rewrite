@@ -16,7 +16,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
@@ -28,6 +28,7 @@ import openfl.events.IOErrorEvent;
 import openfl.media.Sound;
 import openfl.net.FileReference;
 import openfl.utils.ByteArray;
+import openfl.display.BitmapData;
 import flixel.addons.ui.FlxUIDropDownMenu;
 
 import data.*;
@@ -38,7 +39,7 @@ import data.Song.SwagSong;
 import data.Conductor.BPMChangeEvent;
 import mappedEvents.Event.EventData;
 import data.Section.SwagSection;
-import mappedEvents.Event.EventSection;
+import mappedEvents.Event.Events;
 
 #if sys
 import sys.FileSystem;
@@ -85,7 +86,8 @@ class EventCharter extends MusicBeatState
 		'Set GF Speed',
 		'Play Animation',
 		'Change Scroll Speed',
-		'Set Zoom Speed'
+		'Set Zoom Speed',
+		'Test Middlescroll'
 	];
 
 	var typingShit:FlxInputText;
@@ -93,7 +95,7 @@ class EventCharter extends MusicBeatState
 	var typedValue1:FlxInputText;
 	var curEvent:String = 'Unknown';
 
-	var curSelectedNote:Array<Dynamic>;
+	var curSelectedNote:Events;
 
 	var tempBpm:Float = 0;
 
@@ -111,7 +113,8 @@ class EventCharter extends MusicBeatState
 		else
 		{
 			_events = {
-				"events": []
+				"events": [],
+				"eventsNova": []
 			}
 		}
 
@@ -219,7 +222,7 @@ class EventCharter extends MusicBeatState
 			var selectedEvent:Int = Std.parseInt(event);
 
 			if (curSelectedNote != null)
-				curSelectedNote[1] = eventList[selectedEvent];
+				curSelectedNote.eventName = eventList[selectedEvent];
 
 			curEvent = eventList[selectedEvent];
 
@@ -580,8 +583,7 @@ class EventCharter extends MusicBeatState
 			var value2 = i[3];
 
 			var note:Note = new Note(daStrumTime, 0);
-			note.animation.addByPrefix('eventNote', 'arrowRIGHT', 24, false);
-			note.animation.play('eventNote', true);
+			note.loadGraphic(Paths.image('eventNote'));
 			note.setGraphicSize(GRID_SIZE, GRID_SIZE);
 			note.updateHitbox();
 			note.x = Math.floor(GRID_SIZE / 5);
@@ -593,6 +595,9 @@ class EventCharter extends MusicBeatState
 
 	private function addSection(lengthInSteps:Int = 16):Void
 	{
+		if (_events.events == null)
+			_events.events = [];
+
 		var sec:SwagSection = {
 			lengthInSteps: lengthInSteps,
 			bpm: _song.bpm,
@@ -602,24 +607,18 @@ class EventCharter extends MusicBeatState
 			typeOfSection: 0
 		};
 
-		var evntSec:EventSection = {
-			eventsArray: []
-		}
-
 		if (_song.notes[curSection] == null)
 			_song.notes.push(sec);
-			 
-		_events.events.push(evntSec);
 	}
 
 	function selectNote(note:Note):Void
 	{
 		var swagNum:Int = 0;
 
-		for (i in _events.events[curSection].eventsArray)
+		for (i in _events.eventsNova[curSection])
 		{
-			if (i.strumTime == note.strumTime) {
-				curSelectedNote = _events.events[curSection].eventsArray[swagNum];
+			if (i.time == note.strumTime) {
+				curSelectedNote = _events.events[curSection][swagNum];
 			}
 
 			swagNum += 1;
@@ -630,11 +629,11 @@ class EventCharter extends MusicBeatState
 
 	function deleteNote(note:Note):Void
 	{
-		for (i in _events.events[curSection].eventsArray)
+		for (i in _events.eventsNova[curSection])
 		{
-			if (i[0] == note.strumTime) {
+			if (i.time == note.strumTime) {
 				FlxG.log.add('FOUND EVIL NUMBER');
-				_events.events[curSection].eventsArray.remove(i);
+				_events.eventsNova[curSection].remove(i);
 			}
 		}
 
@@ -661,11 +660,18 @@ class EventCharter extends MusicBeatState
 	{
 		var noteStrum = getStrumTime(dummyArrow.y) + sectionStartTime();
 		var curSelectedEvent:String = curEvent;
-		var value1:String = typedValue1.text;
-		var value2:String = typedValue2.text;
+		var val1:String = typedValue1.text;
+		var val2:String = typedValue2.text;
 
-		_events.events[curSection].eventsArray.push([noteStrum, curSelectedEvent, value1, value2]);
-		curSelectedNote = _events.events[curSection].eventsArray[_events.events[curSection].eventsArray.length - 1];
+		var event:Events = {
+			time: noteStrum,
+			eventName: curSelectedEvent,
+			value1: val1,
+			value2: val2
+		};
+
+		_events.eventsNova[curSection].push(event);
+		curSelectedNote = _events.eventsNova[curSection][_events.eventsNova[curSection].length - 1];
 
 		updateGrid();
 		autosaveEvents();

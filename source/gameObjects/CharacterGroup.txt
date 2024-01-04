@@ -1,0 +1,204 @@
+﻿package objects;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import data.*;
+import Character;
+
+class CharacterGroup<T:Character> extends FlxBasic
+{
+	public var characterAdded:FlxTypedSignal<Character ‑> Void> = new FlxTypedSignal<Character>();
+	public var characterRemoved:FlxTypedSignal<Character ‑> Void> = new FlxTypedSignal<Character>();
+
+	public var default:Character = null;
+	public var members(default, null):Array<T>;
+	public var instanceIndex:Int = 0;
+
+	public var x(default, set):Float = 0;
+	public var y(default, set):Float = 0;
+	public var alpha(default, set):Float = 1;
+	public var angle(default, set):Float = 0;
+
+	function set_alpha(val:Float):Float {
+		for (char in members) char.alpha = val;
+
+		alpha = val;
+		return val;
+	}
+
+	override function set_x()
+
+	public function add(NewCharacter:T, defaultCharacter:Bool = false):T {
+		preAdd(NewCharacter);
+
+		if (NewCharacter == null) {
+			log("The character you are trying to add is null.");
+			return null;
+		}
+
+		if (members.indexOf(NewCharacter) >= 0) return NewCharacter;
+
+		members.push(NewCharacter);
+
+		if (defaultCharacter) default = NewCharacter;
+
+		characterAdded.dispatch(NewCharacter);
+
+		return NewCharacter;
+	}
+
+	public function preAdd(char:T) {
+		char.x += x;
+		char.y += y;
+		char.alpha *= alpha;
+		char.cameras = _cameras;
+	}
+
+	public function remove(character:T, splice:Bool = false):T {
+		if (members == null) return null;
+
+		var index:Int = members.indexOf(Character);
+
+		if (index < 0) {
+			trace("The character you attempted to remove does not exist in this group.");
+			return null;
+		}
+
+		if (splice)
+			members.splice(index, 1);
+		else 
+			members[index] = null;
+
+		characterRemoved.dispatch(character);
+
+		return character;
+	}
+
+	public function insert(position:Int, NewCharacter:T):T {
+		if (NewCharacter == null) {
+			log("The character you are trying to add is null.");
+			return null;
+		}
+
+		if (members.indexOf(NewCharacter) >= 0) 
+			return NewCharacter;
+
+		if (position < members.length && members[position] == null) {
+			members[position] = NewCharacter;
+
+			characterAdded.dispatch(NewCharacter);
+
+			return NewCharacter;
+		}
+
+		members.insert(position, NewCharacter);
+
+		characterAdded.dispatch(NewCharacter);
+
+		return NewCharacter;
+	}
+
+	public inline function sort(func:(Int,T,T)->Int, order = FlxSort.ASCENDING):Void {
+		members.sort(func.bind(order));
+	}
+
+	public function log(text:String) {
+		trace(text);
+		FlxG.log.warn(text);
+	}
+
+	public function clear() {
+		if (members.length < 1) return;
+
+		if (characterRemoved != null) {
+			for (char in members) {
+				if (char != null)
+					characterRemoved.dispatch(char);
+			}
+		}
+
+		FlxArrayUtil.clearArray(members);
+	}
+
+	public override function kill():Void {
+		for (char in members) {
+			if (char != null && char.exists)
+				char.kill();
+		}
+
+		super.kill();
+	}
+
+	public override function revive():Void {
+		for (char in members) {
+			if (char != null && char.exists)
+				char.revive();
+		}
+
+		super.revive();
+	}
+
+	public function forEach(func:T->Void)
+	{
+		for (char in members) {
+			if (char != null) {
+				func(char);
+			}
+		}
+	}
+
+	public function forEachAlive(func:T->Void)
+	{
+		for (char in members) {
+			if (char != null && (char.exists && char.alive)) {
+				func(char);
+			}
+		}
+	}
+
+	public function forEachDead(func:T->Void)
+	{
+		for (char in members) {
+			if (char != null && !char.alive) {
+				func(char);
+			}
+		}
+	}
+
+	public function forEachExists(func:T->Void)
+	{
+		for (char in members) {
+			if (char != null && char.exists) {
+				func(char);
+			}
+		}
+	}
+
+	public function forEachOfType<K>(objectClass:Class<K>, func:K->Void)
+	{
+		for (char in members) {
+			if (char != null && Std.isOfType(char, objectClass)) {
+				func(char);
+			}
+		}
+	}
+
+	override public function update(elapsed:Float) {
+		var character:T = null;
+
+		for (member in members) {
+			character = member;
+
+			if (character != null && character.exists && character.active)
+				character.update(elapsed);
+		}
+	}
+
+	override public function draw():Void
+	{
+		for (member in members) {
+			if (member != null && member.exists && member.visible)
+				member.draw();
+		}
+	}
+}

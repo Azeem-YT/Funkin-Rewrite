@@ -9,6 +9,8 @@ import openfl.system.System;
 import openfl.display._internal.stats.Context3DStats;
 import openfl.display._internal.stats.DrawCallContext;
 import openfl.Lib;
+import flixel.FlxG;
+import flixel.util.FlxColor;
 import data.*;
 
 class FPS extends TextField
@@ -20,7 +22,9 @@ class FPS extends TextField
 	private var times:Array<Float>;
 	private var memoryCount:Float;
 	private var maxMemory:Float;
-	private var versionText:String = "Funkin' Rewrite";
+	private var versionText:String = "Funkin' Nova Engine";
+	private var fps_time:Float = 0;
+	private var fps_hue:Int = 0;
 	public static var currentClass:Dynamic = 'TitleState';
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
@@ -48,6 +52,13 @@ class FPS extends TextField
 		});
 	}
 
+	override function __update(transformOnly:Bool, updateChildren:Bool) {
+		fps_time += FlxG.elapsed * 50;
+		fps_hue = Std.int(fps_time);
+
+		super.__update(updateChildren, updateChildren);
+	}
+
 	private override function __enterFrame(deltaTime:Float):Void
 	{
 		currentTime += deltaTime;
@@ -59,12 +70,11 @@ class FPS extends TextField
 		}
 
 		var currentCount = times.length;
-		currentFPS = Math.round((currentCount + cacheCount) / 4); //Gotta divide by 4 for some reason???
+		currentFPS = Math.round((currentCount + cacheCount) / 4);
 
 		visible = PlayerPrefs.fpsCounter;
 
-		if (currentCount != cacheCount)
-		{
+		if (currentCount != cacheCount) {
 			memoryCount = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
 			if (maxMemory < memoryCount)
 				maxMemory = memoryCount;
@@ -80,7 +90,11 @@ class FPS extends TextField
 
 			text += '\n' + versionText;
 
-			textColor = 0xFFFFFFFF;
+
+			if (PlayerPrefs.rainbowFps)
+				textColor = FlxColor.fromHSB(fps_hue, 1, 1, 1);
+			else
+				textColor = 0xFFFFFFFF;
 
 			#if (gl_stats && !disable_cffi && (!html5 || !canvas))
 			text += "\ntotalDC: " + Context3DStats.totalDrawCalls();
@@ -91,4 +105,23 @@ class FPS extends TextField
 
 		cacheCount = currentCount;
 	}
+}
+
+class FPSColors
+{
+	public static var colors:Array<Int> = [
+		 0xFF0000FF,
+		 0xFF8B4513,
+		 0xFF00FFFF,
+		 0xFF808080,
+		 0xFF008000,
+		 0xFF00FF00,
+		 0xFFFF00FF,
+		 0xFFFFA500,
+		 0xFFFFC0CB,
+		 0xFF800080,
+		 0xFFFF0000,
+		 0xFFFFFF00
+	];
+
 }

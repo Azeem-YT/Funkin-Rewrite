@@ -34,11 +34,7 @@ class MainMenuState extends MusicBeatState
 	var camFollow:FlxObject;
 
 	var versionShit:FlxText;
-	var gameVersion:String = "v2.7.1" + '\nUnknown Engine v' + TitleState.currentVersion;
-	var realFps:Float = FlxG.save.data.fpsR;
-	var curOption:Int = 0;
-	var optionName:String = "";
-	var optionInfo:Array<String> = [];
+	var gameVersion:String = "v2.7.1" + '\nNova Engine v' + TitleState.currentVersion;
 
 	override function create()
 	{
@@ -74,7 +70,6 @@ class MainMenuState extends MusicBeatState
 		magenta.antialiasing = true;
 		magenta.color = 0xFFfd719b;
 		add(magenta);
-		// magenta.scrollFactor.set();
 
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		add(menuItems);
@@ -89,7 +84,6 @@ class MainMenuState extends MusicBeatState
 			menuItem.animation.addByPrefix('selected', optionShit[i] + " white", 24);
 			menuItem.animation.play('idle');
 			menuItem.ID = i;
-			menuItem.screenCenter(X);
 			menuItems.add(menuItem);
 			menuItem.scrollFactor.set();
 			menuItem.antialiasing = true;
@@ -194,12 +188,10 @@ class MainMenuState extends MusicBeatState
 		if (curSelected < 0)
 			curSelected = menuItems.length - 1;
 
-		menuItems.forEach(function(spr:FlxSprite)
-		{
+		menuItems.forEach(function(spr:FlxSprite) {
 			spr.animation.play('idle');
 
-			if (spr.ID == curSelected)
-			{
+			if (spr.ID == curSelected) {
 				spr.animation.play('selected');
 				camFollow.setPosition(spr.getGraphicMidpoint().x, spr.getGraphicMidpoint().y);
 			}

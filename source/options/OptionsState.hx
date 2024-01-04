@@ -44,6 +44,8 @@ class OptionsState extends MusicBeatState //Week 7 Options state is goofy
 		add(items = new TextMenuList());
 		createItem('preferences', function() openSub('prefs'));
 		createItem("controls", function() openSub('controls'));
+		createItem('Note Colors', function() openNoteColors());
+		createItem('Notes', function() openSub('notes'));
 		createItem('Graphics', function() openSub('graphics'));
 		createItem("exit", exit);
 
@@ -65,6 +67,8 @@ class OptionsState extends MusicBeatState //Week 7 Options state is goofy
 				dynamicState = new Preferences();
 			case 'controls':
 				dynamicState = new ControlsMenu();
+			case 'notes':
+				dynamicState = new NoteSettings();
 			case 'graphics':
 				dynamicState = new GraphicsSettings();
 		}
@@ -72,6 +76,11 @@ class OptionsState extends MusicBeatState //Week 7 Options state is goofy
 		returnSub = dynamicState;
 
 		return returnSub;
+	}
+
+	public function openNoteColors() {
+		var colorsState:NoteColorSettings = new NoteColorSettings();
+		openSub(null, colorsState);
 	}
 
 	override function update(elapsed:Float) {
@@ -82,8 +91,9 @@ class OptionsState extends MusicBeatState //Week 7 Options state is goofy
 		super.update(elapsed);
 	}
 
-	public function openSub(state:String = 'prefs') {
-		curSubState = getSubState(state);
+	public function openSub(state:String = null, ?custSub:MusicBeatSubstate = null) {
+		if (state != null) curSubState = getSubState(state);
+		else curSubState = custSub;
 
 		if (curSubState != null) {
 			openSubState(curSubState);

@@ -34,23 +34,20 @@ class Stage
 	{
 		var jsonData = null;
 
-		#if sys
-		if (FileSystem.exists(Paths.mods('stages/$curStage.json'))) {
-			jsonData = Json.parse(File.getContent(Paths.mods('stages/$curStage.json')));
-		}
-		else #end if (Assets.exists(Paths.getPreloadPath('stages/$curStage.json'))) {
-			jsonData = Json.parse(Assets.getText(Paths.getPreloadPath('stages/$curStage.json')));
-		}
+		var stagePath:String = 'stages/$curStage/$curStage.json';
+		var stagePathAlt:String = 'stages/$curStage.json';
+
+		jsonData = getStageData(curStage, [stagePath, stagePathAlt]);
 
 		if (jsonData == null) {
 			jsonData = loadDefaultData(jsonData);
-			trace('Stage Error! Loaded default json');
+			trace('Stage Error!');
 		}
 
 		return jsonData;
 	}
 
-	public static function loadDefaultData(jsonData = null):Any
+	public static function loadDefaultData(jsonData = null):StageData
 	{
 		jsonData = {
 			"boyfriendPos": [770.0, 450.0],
@@ -62,7 +59,27 @@ class Stage
 			"hidegf": false
 		};
 
+		trace("Loading default stage data.");
+
 		return jsonData;
 	}
 
+
+	public static function getStageData(stage:String, dirs:Array<String>):StageData {
+		if (dirs.length < 1) dirs.push('stages/$stage/$stage.json');
+
+		for (path in dirs) {
+			#if sys
+			var modPth:String = Paths.mods(path);
+			if (!modPth.endsWith('.json')) modPth += '.json';
+			if (FileSystem.exists(modPth)) return Json.parse(File.getContent(modPth));
+			#end
+
+			var assPath:String = Paths.getPreloadPath(path);
+			if (!assPath.endsWith('.json')) assPath += '.json';
+			if (Assets.exists(modPth)) return Json.parse(Assets.getText(assPath));
+		}
+
+		return loadDefaultData();
+	}
 }

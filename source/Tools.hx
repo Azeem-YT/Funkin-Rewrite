@@ -19,7 +19,7 @@ class Tools //Im too lazy to add more stuff
         return 0;
     }
     
-    public static function getImagePixelHeight(texture:String = ''):Int { //Both get width and height are ment for pixel notes
+    public static function getImagePixelHeight(texture:String = ''):Int {
         if (texture != null && texture != '') {
             var sprite:FlxSprite = new FlxSprite().loadGraphic(Paths.image(texture));
             if (sprite != null)

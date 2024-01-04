@@ -2,6 +2,8 @@ package gameObjects;
 
 import flixel.FlxSprite;
 import lime.utils.Assets;
+import flixel.ui.FlxBar;
+import Paths.FileTypes;
 import data.*;
 #if sys
 import sys.FileSystem;
@@ -33,44 +35,40 @@ class HealthIcon extends FlxSprite
 
 	public function changeIcon(char:String, isPlayer:Bool = false, ?animData:AnimatedData)
 	{
-		if (animData != null){
-			frames = Paths.getSparrowAtlas(animData.image);
-			animation.addByPrefix("winning", animData.neutralAnim, 24, true);
-		}
-		else
-		{
-			var imageIsString:Bool = Std.isOfType(Paths.image('icons/$char'), String);
-			var graphicShit:Dynamic = Paths.image('icons/$char');
-			var graphicsAlt:Dynamic = Paths.image('icons/icon-$char');
+		var iconName:String = 'icons/$char';
 
-			if (graphicShit != null)
-				loadGraphic(graphicShit, true, 150, 150);
-			
-			if (graphicsAlt != null && graphic == null)
-				loadGraphic(graphicsAlt, true, 150, 150);
-
-			if (graphic == null) {
-				loadGraphic(Paths.image('icons/icon-face'), true, 150, 150);
-			}
-			
-			animation.add(char, [0, 1], 0, false, isPlayer);
-			animation.play(char);
-			antialiasing = true;
-		}
+		if (!Paths.exists(iconName, '', IMAGE)) iconName = 'icons/icon-$char';
+		if (!Paths.exists(iconName, '', IMAGE)) iconName = 'icons/icon-face';
+		
+		var graphic = Paths.image(iconName);
+		loadGraphic(graphic, true, 150, 150);
+		animation.add(char, [0, 1], 0, false, isPlayer);
+		animation.play(char);
+		antialiasing = true;
 
 		if (char.endsWith('-pixel')) {
 			antialiasing = false;
 		}
 
-		if (antialiasing)
-			antialiasing = PlayerPrefs.antialiasing;
+		if (antialiasing) antialiasing = PlayerPrefs.antialiasing;
 	}
 
-	override function update(elapsed:Float)
-	{
+	public function updateIcon(p:Int = 1, healthBar:FlxBar) {
+		if (animation.curAnim == null || healthBar == null) return;
+
+		if (p == 1) {
+			if (healthBar.percent > 80) animation.curAnim.curFrame = 1;
+			else animation.curAnim.curFrame = 0;
+			return;
+		}
+
+		if (healthBar.percent > 80) animation.curAnim.curFrame = 1;
+		else animation.curAnim.curFrame = 0;
+	}
+
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (sprTracker != null)
-			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
+		if (sprTracker != null) setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
 	}
 }

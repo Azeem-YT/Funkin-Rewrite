@@ -43,7 +43,7 @@ class PlayerSettings
 			
 			if (keyData != null) {
 				useDefault = false;
-				trace("loaded key data: " + haxe.Json.stringify(keyData));
+				//trace("loaded key data: " + haxe.Json.stringify(keyData));
 				controls.fromSaveData(keyData, Keys);
 			}
 		}

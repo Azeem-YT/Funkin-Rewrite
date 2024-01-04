@@ -31,21 +31,20 @@ class HudGroup extends FlxSpriteGroup
 	public function new(?instance:PlayState = null) {
 		super();
 
-		if (instance == null)
-			gameInstance = new PlayState();
-		else
-			gameInstance = instance;
+		if (instance == null) gameInstance = new PlayState(); else gameInstance = instance;
 
 		var healthP1:String = 'face';
 		var healthP2:String = 'face';
 
 		reloadHealthBar();
 
-		if (PlayState.dad != null)
-			healthP2 = PlayState.dad.healthIcon;
-		
-		if (PlayState.boyfriend != null)
-			healthP1 = PlayState.boyfriend.healthIcon;
+		if (PlayState.dad != null) healthP2 = PlayState.dad.healthIcon;
+		if (PlayState.boyfriend != null) healthP1 = PlayState.boyfriend.healthIcon;
+
+		if (PlayerPrefs.playOpponent) {
+			healthP2 = PlayState.boyfriend.healthIcon;
+			healthP1 = PlayState.dad.healthIcon;
+		}
 
 		iconP1 = new HealthIcon(healthP1, true, null);
 		iconP1.y = healthBar.y - (iconP1.height / 2);
@@ -55,8 +54,10 @@ class HudGroup extends FlxSpriteGroup
 		iconP2.y = healthBar.y - (iconP2.height / 2);
 		add(iconP2);
 
-		scoreTxt = new FlxText(healthBarBG.x, healthBarBG.y + 40, 0, "");
-		scoreTxt.setFormat(Paths.font('vcr.ttf'), 18);
+		var scoreX:Float = FlxG.width / 20;
+
+		scoreTxt = new FlxText(scoreX, FlxG.height * 0.8, 0, "");
+		scoreTxt.setFormat(Paths.font('vcr.ttf'), 26);
 		scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1.5);
 		scoreTxt.scrollFactor.set();
 		add(scoreTxt);
@@ -68,14 +69,12 @@ class HudGroup extends FlxSpriteGroup
 	}
 
 	public function reloadHealthBar() {
-		if (healthBar != null)
-			remove(healthBar);
+		if (healthBar != null) remove(healthBar);
+		if (healthBarBG != null) remove(healthBarBG);
 
-		if (healthBarBG != null)
-			remove(healthBarBG);
+		var BarX:Float = FlxG.width / 2;
 
-		healthBarBG = new FlxSprite(0, FlxG.height * 0.9).loadGraphic(Paths.image('healthBar'));
-		healthBarBG.screenCenter(X);
+		healthBarBG = new FlxSprite(BarX, FlxG.height * 0.9).loadGraphic(Paths.image('healthBar'));
 		healthBarBG.scrollFactor.set();
 		add(healthBarBG);
 
@@ -85,11 +84,13 @@ class HudGroup extends FlxSpriteGroup
 		var colorArrayP1:Array<Int> = [128, 128, 128];
 		var colorArrayP2:Array<Int> = [128, 128, 128];
 
-		if (PlayState.dad != null)
-			colorArrayP1 = PlayState.dad.healthColors;
-		
-		if (PlayState.boyfriend != null)
-			colorArrayP2 = PlayState.boyfriend.healthColors;
+		if (PlayState.dad != null) colorArrayP1 = PlayState.dad.healthColors;	
+		if (PlayState.boyfriend != null) colorArrayP2 = PlayState.boyfriend.healthColors;
+
+		if (PlayerPrefs.playOpponent) {
+			colorArrayP1 = PlayState.boyfriend.healthColors;
+			colorArrayP2 = PlayState.dad.healthColors;
+		}
 
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), gameInstance,
 			'health', 0, healthBarMax);

@@ -26,10 +26,18 @@ class PlayerPrefs
 	public static var showMem:Bool = false;
 	public static var antialiasing:Bool = true;
 	public static var playOpponent:Bool = false;
+	public static var rainbowFps:Bool = false;
 	public static var noteOffset:Float = 0;
 	public static var persistentCache:Bool = false;
-	public static var noteColors:Array<Float> = [1, 1, 1, 1];
+	public static var noteColors:Array<Array<Int>> = [
+		[0, 1, 1],
+		[0, 1, 1],
+		[0, 1, 1],
+		[0, 1, 1]
+	];
 	public static var marvelousRating:Bool = true;
+	public static var noteAnim:String = 'default';
+	public static var noteStyle:String = 'default';
 
 	public static var marvelousWindow:Int = 20;
 	public static var sickWindow:Int = 40;
@@ -67,6 +75,9 @@ class PlayerPrefs
 		FlxG.save.data.playOpponent = playOpponent;
 		FlxG.save.data.modVariables = modVariables;
 		FlxG.save.data.noteColors = noteColors;
+		FlxG.save.data.noteAnim = noteAnim;
+		FlxG.save.data.noteStyle = noteStyle;
+		FlxG.save.data.rainbowFps = rainbowFps;
 	}
 
 	public static function resetPrefs() {
@@ -129,8 +140,20 @@ class PlayerPrefs
 			modVariables = FlxG.save.data.modVariables;
 		}
 		
-		if (FlxG.save.data.noteColors != null) {
-			noteColors = FlxG.save.data.noteColors;
+		//if (FlxG.save.data.noteColors != null) {
+		//	noteColors = FlxG.save.data.noteColors;
+		//}
+		
+		if (FlxG.save.data.noteAnim != null) {
+			noteAnim = FlxG.save.data.noteAnim;
+		}
+		
+		if (FlxG.save.data.noteStyle != null) {
+			noteStyle = FlxG.save.data.noteStyle;
+		}
+		
+		if (FlxG.save.data.rainbowFps != null) {
+			rainbowFps = FlxG.save.data.rainbowFps;
 		}
 
 		setFramerate();
@@ -151,8 +174,8 @@ class PlayerPrefs
 		FlxG.save.data.fpsCap = fpsCap;
 		if (fpsCap < 30) fpsCap = 30;
 		if (fpsCap > FlxG.drawFramerate) {
-			FlxG.drawFramerate = Math.round(fpsCap);
 			FlxG.updateFramerate = Math.round(fpsCap);
+			FlxG.drawFramerate = Math.round(fpsCap);
 		}
 		else {
 			FlxG.updateFramerate = Math.round(fpsCap);

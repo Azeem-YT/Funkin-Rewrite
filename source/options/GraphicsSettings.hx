@@ -61,6 +61,14 @@ class GraphicsSettings extends BaseOptionsMenu
 			true
 		);
 		pushOption(option);
+		
+		var option:OptionPref = new OptionPref(
+			'rainbowFps', 
+			"Rainbow FPS Counter",
+			'bool',
+			true
+		);
+		pushOption(option);
 
 		#if sys
 		if (FileSystem.isDirectory(Paths.mods('options/graphics/'))) {

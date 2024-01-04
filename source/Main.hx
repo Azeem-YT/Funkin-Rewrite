@@ -18,6 +18,7 @@ import data.*;
 
 #if sys
 import modding.*;
+import sys.io.Process;
 import sys.FileSystem;
 import sys.io.File;
 #end
@@ -71,17 +72,13 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
+		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, uncaughtError);
+
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
 
-		if (zoom == -1)
-		{
-			var ratioX:Float = stageWidth / gameWidth;
-			var ratioY:Float = stageHeight / gameHeight;
-			zoom = Math.min(ratioX, ratioY);
-			gameWidth = Math.ceil(stageWidth / zoom);
-			gameHeight = Math.ceil(stageHeight / zoom);
-		}
+		gameWidth = Math.ceil(stageWidth / zoom);
+		gameHeight = Math.ceil(stageHeight / zoom);
 
 		#if !debug
 		initialState = TitleState;
@@ -108,14 +105,8 @@ class Main extends Sprite
 			if (currentState == "ModState") currentState = ModState.stateName;
 		});
 
-		game = new FlxGame(gameWidth, gameHeight, initialState, zoom, 60, 60, skipSplash, startFullscreen);
+		game = new FlxGame(gameWidth, gameHeight, initialState, 60, 60, skipSplash, startFullscreen);
 		addChild(game);
-	}
-
-	private override function __update(transformOnly:Bool, updateChildren:Bool)
-	{
-		super.__update(transformOnly, updateChildren); //If you wanna update something in Main.
-
 	}
 
 	public static function getFPSCounter() {
@@ -135,8 +126,53 @@ class Main extends Sprite
 	}
 	#end
 
-	public static function setFPSVisible() {
-		if (framerateCounter != null)
-			framerateCounter.visible = PlayerPrefs.fpsCounter;
+	public static function setFPSVisible()
+		if (framerateCounter != null) framerateCounter.visible = PlayerPrefs.fpsCounter;
+		
+	#if sys
+	private function uncaughtError(err:UncaughtErrorEvent) {
+		var gameVersion:String = "Nova Engine: " + TitleState.currentVersion;
+		var uncaughtError:String = '';
+		var callstck:String = '';
+		var path:String = './crash/NovaEngine_Crash-';
+		var callStack:Array<StackItem> = [];
+		var time:String = Date.now().toString();
+
+		path += time;
+		
+		try {
+			callStack = CallStack.exceptionStack(true);
+		}
+		catch (e:Dynamic) {
+			callStack = [];
+		}
+
+		if (callStack.length > 0) {
+			for (stackitm in callStack) {
+				switch (stackitm) {
+					case FilePos(s, file, line, column):
+						callstck += file + " (line " + line + ")\n";
+					default:
+						Sys.println(stackitm);
+				}
+			}
+		}
+
+		uncaughtError = err.error;
+
+		var crashHandler:String = "CrashHandler" #if windows + ".exe" #end;
+		var savedCrash:String = callstck + "\nUncaught Error: " + uncaughtError;
+
+		if (FileSystem.exists("./" + crashHandler)) {
+			#if linux crashHandler = "./" + crashHandler;#end
+
+			new Process(crashHandler, [path, uncaughtError, callstck]);
+		}
+		else {
+			Application.current.window.alert(savedCrash, "Game Crashed!");
+		}
+
+		Sys.exit(1);
 	}
+	#end
 }

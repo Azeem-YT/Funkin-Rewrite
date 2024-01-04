@@ -75,7 +75,7 @@ class FreeplayState extends MusicBeatState
 		var directorys:Array<String> = [Paths.getPreloadPath()];
 
 		#if sys
-		directorys.insert(0, Paths.mods());
+		directorys.push(Paths.mods());
 		#end
 
 		#if sys
@@ -254,12 +254,11 @@ class FreeplayState extends MusicBeatState
 	}
 
 	public function addSong(song:String, weekName:String, songCharacter:String, colors:Array<Int>, difficultys:Array<String>) {
-		songs.push(new SongMetadata(song, weekName, songCharacter, colors, difficultys));
+		songs.push(new SongMetadata(StringTools.replace(song, "-", " "), weekName, songCharacter, colors, difficultys));
 	}
 
-	public function jsonFileName(jsonName:String):String {
+	public function jsonFileName(jsonName:String):String
 		return jsonName.replace('.json', '');
-	}
 
 	public function addWeek(songs:Array<String>, weekName:String, ?songCharacters:Array<String>, ?colors:Array<Int>, ?difficultys:Array<String>)
 	{
@@ -315,38 +314,22 @@ class FreeplayState extends MusicBeatState
 	}
 
 	public function loadSong() {
-		for (i in 0...grpSongs.members.length) {
-			if (i == curSelected)
-				grpSongs.members[i].moveX = false;
-			else
-				grpSongs.members[i].targetY = grpSongs.members[curSelected].targetY + 5; //Make Sure it goes off screen
-		}
-
 		FlxG.sound.play(Paths.sound('confirmMenu'));
 
-		var oldX:Float = grpSongs.members[curSelected].x;
-		var screenCenteredX:Float = 0;
-		grpSongs.members[curSelected].screenCenter(X);
-		screenCenteredX = grpSongs.members[curSelected].x;
-		grpSongs.members[curSelected].x = oldX;
+		var poop:String = Highscore.formatSong(CoolUtil.spaceToDash(songs[curSelected].songName.toLowerCase()), diff);
 
-		FlxTween.tween(grpSongs.members[curSelected], {x: screenCenteredX - 50}, 0.25);
-		FlxFlicker.flicker(grpSongs.members[curSelected], 1, 0.06, true, false, function(flicker:FlxFlicker){
-			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), diff);
+		PlayState.SONG = Song.loadFromJson(poop, CoolUtil.spaceToDash(songs[curSelected].songName.toLowerCase()));
+		PlayState.EVENTS = Song.loadEvents(CoolUtil.spaceToDash(songs[curSelected].songName.toLowerCase()));
+		PlayState.isStoryMode = false;
+		PlayState.diffArray = diffArray;
+		PlayState.storyDifficulty = curDifficulty;
 
-			PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
-			PlayState.EVENTS = Song.loadEvents(songs[curSelected].songName.toLowerCase());
-			PlayState.isStoryMode = false;
-			PlayState.diffArray = diffArray;
-			PlayState.storyDifficulty = curDifficulty;
-
-			if (PlayState.SONG != null)
-				LoadingState.loadAndSwitchState(new PlayState());
-			else {
-				ErrorState.song = songs[curSelected].songName;
-				FlxG.switchState(new ErrorState());
-			}
-		});
+		if (PlayState.SONG != null)
+			LoadingState.loadAndSwitchState(new PlayState());
+		else {
+			ErrorState.song = songs[curSelected].songName;
+			FlxG.switchState(new ErrorState());
+		}
 	}
 
 	function changeDiff(change:Int = 0)
@@ -408,7 +391,7 @@ class FreeplayState extends MusicBeatState
 			if (color != intendedColor)
 			{
 				if (colorTween != null)
-					colorTween.cancel;
+					colorTween.cancel();
 
 				intendedColor = color;
 

@@ -50,6 +50,7 @@
 	<define name = "ALLOW_LUA" if= "desktop"/>
 	<define name = "ALLOW_HSCRIPT" if= "desktop"/>
 	<define name = "ALLOW_VIDEOS" if= "desktop"/>
+	<define name = "SHADER_TOY"/>
 
 	<section if="PRELOAD_ALL">
 		<library name="songs"    preload="true" />
@@ -130,16 +131,14 @@
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-ui" />
-	<haxelib name="newgrounds"/>
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="linc_luajit"/>
-	<haxelib name="tentools" />
 	<haxelib name="systools" />
 	<ndll name="systools" haxelib="systools" />
 	<haxelib name="hxCodec" if="desktop" />
 	<haxelib name="flxanimate"/>
 	<haxelib name="hxShaders"/>
-	<haxelib name="flixel-shadertoy-shader-lr" />
+	<haxelib name="haxeui-core"/>
 	<!-- <haxelib name="hxcpp-debug-server" if="desktop"/> -->
 
 	<!-- <haxelib name="markdown" /> -->

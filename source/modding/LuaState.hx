@@ -38,7 +38,7 @@ import data.*;
 import gameObjects.notes.Strum.StaticArrow;
 
 #if sys
-import FlxRuntimeShader;
+import shaders.FlxRuntimeShader;
 import flash.display.Shader;
 import sys.FileSystem;
 import sys.io.File;
@@ -54,9 +54,6 @@ class LuaState
 	public var isClosed:Bool = false;
 	public var playstate:PlayState;
 
-	public static var errorStop:Dynamic = 1;
-	public static var stopFunc:Dynamic = 0;
-	public static var continueFunc:Dynamic = 2;
 	public var scriptName:String;
 
 	#if ALLOW_HSCRIPT
@@ -123,9 +120,9 @@ class LuaState
 		setVar('botplay', PlayerPrefs.botplay);
 		setVar('songPosition', Conductor.songPosition);
 
-		setVar('errorStop', errorStop);
-		setVar('stopFunc', stopFunc);
-		setVar('continueFunc', continueFunc);
+		setVar('FUNCTION_ERROR', Functions.FUNCTION_ERROR);
+		setVar('FUNCTION_STOP', Functions.FUNCTION_STOP);
+		setVar('FUNCTION_CONTINUE', Functions.FUNCTION_CONTINUE);
 		
 		#if ALLOW_LUA
 		Lua_helper.add_callback(lua, "setSpriteShader", function(obj:String, shaderName:String) {
@@ -551,8 +548,8 @@ class LuaState
 			}
 		});
 
-		Lua_helper.add_callback(lua, "createNewStrumline", function(x:Float, arrowTexture:String, downscroll:Bool){
-			var strumline:Strum = new Strum(x, playstate, arrowTexture, null, downscroll);
+		Lua_helper.add_callback(lua, "createNewStrumline", function(x:Float, arrowTexture:String){
+			var strumline:Strum = new Strum(x, playstate, arrowTexture, null);
 			PlayState.strumLines.add(strumline);
 			for (i in 0...3)
 					PlayState.strumLineNotes.add(strumline.strums.members[i]);
@@ -881,7 +878,7 @@ class LuaState
 	public function callFunc(func:String, args:Array<Dynamic>):Dynamic {
 		#if ALLOW_LUA
 		if (isClosed || lua == null)
-			return continueFunc;
+			return Functions.FUNCTION_CONTINUE;
 
 		try {
 			Lua.getglobal(lua, func);
@@ -890,7 +887,7 @@ class LuaState
 
 			if (variableType != Lua.LUA_TFUNCTION) {
 				Lua.pop(lua, 1);
-				return continueFunc;
+				return Functions.FUNCTION_CONTINUE;
 			}
 
 			for (arg in args) {
@@ -901,12 +898,12 @@ class LuaState
 			if (luaOk != Lua.LUA_OK) {
 				//playstate.addNotification("Error with function " + func + ' on script: ' + scriptName);
 				trace("Error with function " + func + ' on script: ' + scriptName);
-				return continueFunc;
+				return Functions.FUNCTION_CONTINUE;
 			}
 
 			var returnValue:Dynamic = cast Convert.fromLua(lua, -1);
 			if (returnValue == null)
-				returnValue = continueFunc;
+				returnValue = Functions.FUNCTION_CONTINUE;
 
 			Lua.pop(lua, 1);
 			return returnValue;
@@ -916,7 +913,7 @@ class LuaState
 		}
 		#end
 
-		return continueFunc;
+		return Functions.FUNCTION_CONTINUE;
 	}
 
 	public function removeTag(id:String) {
@@ -1385,7 +1382,7 @@ class LuaSprite extends FlxSprite
 class LuaCamera extends FlxCamera
 {
 	public var id:String = 'default ID';
-	public var cameraShaders:Array<BitmapFilter> = [];
+	public var cameraShaders(default, set):Array<BitmapFilter> = [];
 
 	public function new(id:String, x:Int, y:Int, width:Int, height:Int, zoom:Float) {
 		super(x, y, width, height, zoom);
@@ -1396,10 +1393,68 @@ class LuaCamera extends FlxCamera
 	public function pushShader(shader:Shader) { //Class made only for shaders lol
 		var cameraFilter:ShaderFilter = new ShaderFilter(shader);
 		cameraShaders.push(cameraFilter);
-		setFilters(cameraShaders);
+	}
+
+	inline public function set_cameraShaders(sdrs:Array<BitmapFilter>):Array<BitmapFilter> {
+		setFilters(sdrs);
+		cameraShaders = sdrs;
+
+		return sdrs;
 	}
 }
 
 class LuaCharacter extends Character {
-	public var isAdded:Bool = false; //Unsed for now
+	public var isAdded:Bool = false; //Unused for now
+}
+
+class LuaError extends FlxSpriteGroup
+{
+	public var textSprite:FlxText;
+	public var text(default, set):String;
+	public var maxTxtSize:Float = 150;
+	public var box:FlxSprite;
+
+	public var onContinue:Void -> Void;
+
+	public function new(text:String, ?maxSize:Float = 150) {
+		super(x, y);
+
+		reloadText(text, maxSize);
+	}
+
+	inline public function set_text(val:String):String {
+		if (textSprite.text != val) {
+			reloadText(val, maxSize);
+		}
+
+		text = val;
+		return val;
+	}
+
+	public function reloadText(txt:String, maxSize:Float) {
+		if (members.contains(textSprite))	{
+			remove(textSprite);
+		}
+
+		if (members.contains(box))
+			remove(box);
+
+		maxTxtSize = maxSize;
+
+		screenCenter();
+
+		textSprite = new FlxText(0, 0, maxSize, text, 15);
+		textSprite.color = FlxColor.RED;
+		
+		var boxHeight:Float = textSprite.fieldHeight + 50;
+		var boxWidth:Float = textSprite.fieldWidth + 50;
+
+		box = new FlxSprite(0, 0);
+		box.makeGraphic(Std.int(boxWidth), Std.int(boxHeight), FlxColor.GRAY);
+		add(box);
+		
+		textSprite.x = box.getMidpoint().x;
+		textSprite.y = box.getMidpoint().y;
+		add(textSprite);
+	}
 }

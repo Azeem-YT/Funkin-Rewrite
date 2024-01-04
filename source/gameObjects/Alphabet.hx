@@ -24,6 +24,7 @@ class Alphabet extends FlxSpriteGroup
 	public var optionItem:Bool = false;
 	public var typeSpeed:Float = 0.05;
 	public var inDialogue:Bool = false;
+	public var alphabetID:Int = 0;
 	public var moveX:Bool = true;
 	public var moveY:Bool = true;
 

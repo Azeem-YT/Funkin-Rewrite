@@ -115,7 +115,7 @@ class CoolUtil
 		for (i in 0...list.length)
 			list[i] = list[i].trim();
 
-		switch (list[2]) {
+		switch (list[2].toLowerCase()) {
 			case 'bool':
 				option = new OptionPref(
 					list[0],

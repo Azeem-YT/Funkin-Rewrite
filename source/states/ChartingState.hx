@@ -19,8 +19,9 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
+import flixel.FlxCamera;
 import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
 import flixel.util.FlxColor;
@@ -31,6 +32,9 @@ import openfl.events.IOErrorEvent;
 import openfl.media.Sound;
 import openfl.net.FileReference;
 import openfl.utils.ByteArray;
+import openfl.display.BitmapData;
+import flixel.addons.effects.chainable.*;
+import mappedEvents.Event.EventData;
 
 #if sys
 import sys.FileSystem;
@@ -79,10 +83,26 @@ class ChartingState extends MusicBeatState
 	var gridBG:FlxSprite;
 
 	var _song:SwagSong;
+	var _events:EventData;
 
 	var typingShit:FlxInputText;
 	var typedNoteTexture:FlxInputText;
 	var typedSplashTexture:FlxInputText;
+
+	var eventList:Array<String> = [
+		'',
+		'Change Character',
+		'Play Hey',
+		'Set GF Speed',
+		'Play Animation',
+		'Change Scroll Speed',
+		'Set Zoom Speed'
+	];
+
+	var typedEvent:FlxInputText;
+	var typedValue2:FlxInputText;
+	var typedValue1:FlxInputText;
+	var curEvent:String = 'Unknown';
 	/*
 	 * WILL BE THE CURRENT / LAST PLACED NOTE
 	**/
@@ -94,6 +114,9 @@ class ChartingState extends MusicBeatState
 
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
+
+	public var bgCam:FlxCamera;
+	public var notesCam:FlxCamera;
 
 	public static var lastNumberLanes:Int = 2;
 
@@ -139,6 +162,11 @@ class ChartingState extends MusicBeatState
 	{
 		curSection = lastSection;
 
+		bgCam = new FlxCamera();
+		notesCam = new FlxCamera();
+		FlxG.cameras.reset(bgCam);
+		FlxG.cameras.add(notesCam);
+
 		if (PlayState.SONG != null)
 			_song = PlayState.SONG;
 		else
@@ -161,6 +189,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		gridBlackLines = new FlxTypedGroup<FlxSprite>();
+		gridBlackLines.cameras = [notesCam];
 		
 		var numbOfLanes:Int = _song.numbPlayers;
 
@@ -168,6 +197,16 @@ class ChartingState extends MusicBeatState
 			numbOfLanes = 2;
 
 		trace(numbOfLanes);
+
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg.scrollFactor.x = 0;
+		bg.scrollFactor.y = 0;
+		bg.setGraphicSize(Std.int(bg.width * 1.1));
+		bg.updateHitbox();
+		bg.screenCenter();
+		bg.alpha = 0.5;
+		bg.cameras = [bgCam];
+		add(bg);
 
 		addLanes(numbOfLanes);
 
@@ -179,6 +218,9 @@ class ChartingState extends MusicBeatState
 		leftIcon.setGraphicSize(0, 45);
 		rightIcon.setGraphicSize(0, 45);
 
+		leftIcon.cameras = [notesCam];
+		rightIcon.cameras = [notesCam];
+
 		add(leftIcon);
 		add(rightIcon);
 
@@ -188,10 +230,12 @@ class ChartingState extends MusicBeatState
 		rightIcon.setPosition(gridWidth, -100);
 
 		curRenderedNotes = new FlxTypedGroup<Note>();
+		curRenderedNotes.cameras = [notesCam];
+
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
+		curRenderedSustains.cameras = [notesCam];
 
 		FlxG.mouse.visible = true;
-		FlxG.save.bind('funkin', 'ninjamuffin99');
 
 		tempBpm = _song.bpm;
 
@@ -210,9 +254,11 @@ class ChartingState extends MusicBeatState
 		add(bpmTxt);
 
 		strumLine = new FlxSprite(0, 50).makeGraphic(Std.int(FlxG.width / 2), 4);
+		strumLine.cameras = [notesCam];
 		add(strumLine);
 
 		dummyArrow = new FlxSprite().makeGraphic(GRID_SIZE, GRID_SIZE);
+		dummyArrow.cameras = [notesCam];
 		add(dummyArrow);
 
 		var tabs = [
@@ -241,15 +287,14 @@ class ChartingState extends MusicBeatState
 
 	function addLanes(lanes:Int = 2)
 	{
-		var noteLanes = lanes * 4;
+		var noteLanes = (lanes * 4) + 1;
 		var numbOfLines:Int = lanes - 1;
 		var gridWidth = GRID_SIZE * noteLanes;
 		var gridPos = (GRID_SIZE / 2) * lanes;
 
-		if (gridBG != null)
-			remove(gridBG);
+		if (gridBG != null) remove(gridBG);
 
-		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, gridWidth, GRID_SIZE * 16, false, 0xffe7e6e6, 0xffd9d5d5);
+		gridBG = createGrid(GRID_SIZE, GRID_SIZE, gridWidth, GRID_SIZE * 16, false, 0xffe7e6e6, 0xffd9d5d5);
 		add(gridBG);
 		
 		gridBlackLines.clear();
@@ -258,9 +303,40 @@ class ChartingState extends MusicBeatState
 			var gridBlackLine:FlxSprite = new FlxSprite(gridBG.x + (((i + 1) * 4) * GRID_SIZE)).makeGraphic(2, Std.int(gridBG.height), FlxColor.BLACK);
 			gridBlackLines.add(gridBlackLine);
 		}
+
 		add(gridBlackLines);
 
 		lastNumberLanes = lanes;
+	}
+
+	/* Yes, this is just stolen from FlxGridOverlay */
+
+	public function createGrid(CellWidth:Int, CellHeight:Int, Width:Int = -1, Height:Int = -1, Alternate:Bool = true, Color1:FlxColor = 0xffe7e6e6,
+			Color2:FlxColor = 0xffd9d5d5):FlxSprite
+	{
+		if (Width == -1)
+		{
+			Width = FlxG.width;
+		}
+
+		if (Height == -1)
+		{
+			Height = FlxG.height;
+		}
+
+		if (Width < CellWidth || Height < CellHeight)
+		{
+			return null;
+		}
+
+		var grid:BitmapData = FlxGridOverlay.createGrid(CellWidth, CellHeight, Width, Height, Alternate, Color1, Color2);
+
+		var output = new FlxSprite();
+		output.cameras = [notesCam]; //Just added this
+		output.pixels = grid;
+		output.dirty = true;
+
+		return output;
 	}
 
 	function addSongUI():Void
@@ -583,10 +659,10 @@ class ChartingState extends MusicBeatState
 			// vocals.stop();
 		}
 
-		FlxG.sound.playMusic(Paths.inst(daSong), 0.6);
+		FlxG.sound.playMusic(Paths.inst(CoolUtil.spaceToDash(daSong)), 0.6);
 
 		// WONT WORK FOR TUTORIAL OR TEST SONG!!! REDO LATER
-		vocals = new FlxSound().loadEmbedded(Paths.voices(daSong));
+		vocals = new FlxSound().loadEmbedded(Paths.voices(CoolUtil.spaceToDash(daSong)));
 		FlxG.sound.list.add(vocals);
 
 		FlxG.sound.music.pause();
@@ -1023,15 +1099,14 @@ class ChartingState extends MusicBeatState
 
 	function updateHeads():Void
 	{
-		if (check_mustHitSection.checked)
-		{
-			leftIcon.changeIcon(_song.player1);
-			rightIcon.changeIcon(_song.player2);
+		if (check_mustHitSection.checked) {
+			leftIcon.changeIcon("bf");
+			rightIcon.changeIcon("dad");
 		}
 		else
 		{
-			leftIcon.changeIcon(_song.player2);
-			rightIcon.changeIcon(_song.player1);
+			leftIcon.changeIcon("dad");
+			rightIcon.changeIcon("bf");
 		}
 	}
 
@@ -1091,22 +1166,45 @@ class ChartingState extends MusicBeatState
 			var daSus = i[2];
 			var daType = i[3];
 
-			var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, false, daType, true);
-			note.sustainLength = daSus;
-			note.setGraphicSize(GRID_SIZE, GRID_SIZE);
-			note.updateHitbox();
-			note.x = Math.floor(daNoteInfo * GRID_SIZE);
-			note.y = Math.floor(getYfromStrum((daStrumTime - sectionStartTime()) % (Conductor.stepCrochet * _song.notes[curSection].lengthInSteps)));
+			if (daNoteInfo == -1) {
+				//Idk
+			}
+			else
+			{
+				var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, false, daType, true);
+				note.sustainLength = daSus;
+				note.setGraphicSize(GRID_SIZE, GRID_SIZE);
+				note.updateHitbox();
+				note.x = Math.floor(daNoteInfo * GRID_SIZE);
+				note.y = Math.floor(getYfromStrum((daStrumTime - sectionStartTime()) % (Conductor.stepCrochet * _song.notes[curSection].lengthInSteps)));
 
-			curRenderedNotes.add(note);
+				curRenderedNotes.add(note);
 
-			if (daSus > 0) {
-				var sustainVis:FlxSprite = new FlxSprite(note.x + (GRID_SIZE / 2),
-					note.y + GRID_SIZE).makeGraphic(8, Math.floor(FlxMath.remapToRange(daSus, 0, Conductor.stepCrochet * 16, 0, gridBG.height)));
-				curRenderedSustains.add(sustainVis);
+				if (daSus > 0) {
+					var sustainVis:FlxSprite = new FlxSprite(note.x + (GRID_SIZE / 2),
+						note.y + GRID_SIZE).makeGraphic(8, Math.floor(FlxMath.remapToRange(daSus, 0, Conductor.stepCrochet * 16, 0, gridBG.height)));
+					curRenderedSustains.add(sustainVis);
+				}
 			}
 		}
 	}
+
+	/*
+	private function addEvent() {
+		var daStrumTime = i[0];
+		var eventName = i[1];
+		var value1 = i[2];
+		var value2 = i[3];
+
+		var note:Note = new Note(daStrumTime, 0);
+		note.loadGraphic(Paths.image('eventNote'));
+		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
+		note.updateHitbox();
+		note.x = Math.floor(GRID_SIZE / 5);
+		note.y = Math.floor(getYfromStrum((daStrumTime - sectionStartTime()) % (Conductor.stepCrochet * _song.notes[curSection].lengthInSteps)));
+
+		curRenderedNotes.add(note);
+	} */
 
 	private function addSection(lengthInSteps:Int = 16):Void
 	{
@@ -1177,6 +1275,25 @@ class ChartingState extends MusicBeatState
 		var noteData = Math.floor(FlxG.mouse.x / GRID_SIZE);
 		var noteType = currentTypeSelected;
 		var noteSus = 0;
+
+		/*
+		if (noteData == -1) {
+			var event:Events = {
+				time: noteStrum,
+				eventName: curSelectedEvent,
+				value1: val1,
+				value2: val2
+			};
+
+			_events.eventsNova[curSection].push(event);
+
+			_events.eventsNova[curSection].push();
+
+			updateGrid();
+			updateNoteUI();
+
+			autosaveEvents();
+		} */
 
 		_song.notes[curSection].sectionNotes.push([noteStrum, noteData, noteSus, noteType]);
 

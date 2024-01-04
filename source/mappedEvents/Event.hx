@@ -4,12 +4,16 @@ import flixel.FlxG;
 
 using StringTools;
 
-typedef EventSection = {
-	var eventsArray:Array<Dynamic>;
+typedef Events = {
+	var time:Float;
+	var eventName:String;
+	var value1:String;
+	var value2:String;
 }
 
 typedef EventData = {
-	var events:Array<EventSection>;
+	var eventsNova:Array<Array<Events>>; //Events
+	var events:Array<Dynamic>; //Psych Engine Support
 }
 
 class Event

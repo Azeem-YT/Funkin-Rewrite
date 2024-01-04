@@ -11,6 +11,7 @@ import haxe.Json;
 import lime.utils.Assets;
 import data.*;
 import states.*;
+import flixel.tweens.*;
 #if sys
 import sys.FileSystem;
 import sys.io.File;
@@ -233,45 +234,47 @@ class StaticArrow extends FlxSprite
 	public var initY:Float;
 
 	public var originAngle:Float;
-	public var alphaTo:Float = 0.9;
-	public var arrowDirs:Array<String> = ['left', 'down', 'up', 'right'];
-	public var isPlayer:Bool = false;
 	public var daPixelZoom:Float = 6;
-	public var texture(default, set):String = 'NOTE_assets';
-	public var isPixelStrum:Bool = false;
+	public var texture(default, set):String = '';
+	public var isPixel:Bool = false;
+	public var isDownscroll(default, set):Bool = false;
+	public var isPlayer:Bool = false;
 
-	inline function set_texture(tex:String) {
-		if (tex != null && tex != '') {
-			reloadSkin(tex, isPixelStrum);
+	public var modified:Bool = false;
+	
+	var player:Int = 0;
+
+	inline function set_isDownscroll(val:Bool):Bool {
+		isDownscroll = val;
+
+		if (!modified) {
+			var strumLineY:Float = 50;
+			if (isDownscroll) strumLineY = FlxG.height - 150;
+			y = strumLineY;
 		}
-		else
-			loadDefault();
 
-		texture = tex;
+		return val;
+	}
+
+	inline function set_texture(tex:String) {	
+		if (texture != tex || (tex == null || tex == '')) {
+			texture = tex;
+			reloadStrum();
+		}
+
 		return tex;
 	}
 
-	function loadDefault()
-	{
-		switch (texture) {
-			case 'pixel':
-				loadGraphic(Paths.image('pixel_arrows'), true, 17, 17);
-				addArrowAnim(true);
-			default:
-				frames = Paths.getSparrowAtlas("NOTE_assets", "shared");
-				addArrowAnim(false);
-		}
-
-		playAnim('static');
-	}
-
-	public function new(x:Float, y:Float, noteData:Int = 0)
+	public function new(x:Float, y:Float, noteData:Int = 0, player:Int = 0)
 	{
 		super(x, y);
 
 		animOffsets = new Map<String, Array<Dynamic>>();
 
 		this.noteData = noteData;
+		this.player = player;
+
+		texture = '';
 
 		updateHitbox();
 		scrollFactor.set();
@@ -280,18 +283,10 @@ class StaticArrow extends FlxSprite
 	public function playAnim(animName:String, ?forced:Bool = false)
 	{
 		animation.play(animName, forced);
-		updateHitbox();
+		if (animation.curAnim == null) return;
 
-		switch (animName){
-			case 'confirm':
-				centerOffsets();
-			if (!isPixelStrum) {
-				offset.x += 25;
-				offset.y += 25;
-			}
-			default:
-				centerOffsets();
-		}
+		centerOffsets();
+		centerOrigin();
 	}
 
 	override public function update(elapsed:Float){
@@ -301,39 +296,60 @@ class StaticArrow extends FlxSprite
 			playAnim('static', true);
 	}
 
-	public function addArrowAnim(isPixel:Bool = false) {
-		if (isPixel) {
-			switch (noteData)
-			{
-				case 0:
-					animation.add('static', [0]);
-					animation.add('pressed', [4, 8], 12, false);
-					animation.add('confirm', [12, 16], 24, false);
-				case 1:
-					animation.add('static', [1]);
-					animation.add('pressed', [5, 9], 12, false);
-					animation.add('confirm', [13, 17], 24, false);
-				case 2:
-					animation.add('static', [2]);
-					animation.add('pressed', [6, 10], 12, false);
-					animation.add('confirm', [14, 18], 12, false);
-				case 3:
-					animation.add('static', [3]);
-					animation.add('pressed', [7, 11], 12, false);
-					animation.add('confirm', [15, 19], 24, false);
-				default:
-					animation.add('static', [2]);
-					animation.add('pressed', [6, 10], 12, false);
-					animation.add('confirm', [14, 18], 12, false);
-					trace('noteData is over 4 or under 0');
-			}
-			setGraphicSize(Std.int(width * daPixelZoom));
-			updateHitbox();
-			antialiasing = false;
-			scrollFactor.set();
+	public function reloadStrum() {
+		var lastAnim:String = null;
+		var lastFrame:Int = 0;
+
+		if (animation.curAnim != null) {
+			lastAnim = animation.curAnim.name;
+			lastFrame = animation.curAnim.curFrame;
 		}
-		else 
-		{
+
+		if (isPixel) {
+			var staticArrow:Int = noteData;
+			var justPressed:Int = 4 + noteData;
+			var pressed:Int = 8 + noteData;
+			var justConfirmed:Int = 12 + noteData;
+			var confirmed:Int = 16 + noteData;
+
+			loadGraphic(Paths.image('pixelUI/' + texture));
+			var width = this.width / 4;
+			var height = this.height / 5;
+
+			loadGraphic(Paths.image('pixelUI/' + texture), true, Math.floor(width), Math.floor(height));
+
+			antialiasing = false;
+			setGraphicSize(Std.int(width * daPixelZoom));
+
+			animation.add('green', [6]);
+			animation.add('red', [7]);
+			animation.add('blue', [5]);
+			animation.add('purple', [4]);
+
+			animation.add('static', [staticArrow]);
+			animation.add('pressed', [justPressed, pressed], 12, false);
+			animation.add('confirm', [justConfirmed, confirmed], 24, false);
+		}
+		else {
+			var noteSkin:String = texture;
+
+			if (noteSkin == null || noteSkin.length < 1) {
+				if (PlayState.SONG != null) noteSkin = PlayState.SONG.arrowTexture;
+
+				if (noteSkin == null || noteSkin.length < 1) {
+					noteSkin = 'NOTE_assets';
+				}
+			}
+
+			frames = Paths.getSparrowAtlas(noteSkin);
+			animation.addByPrefix('green', 'arrowUP');
+			animation.addByPrefix('blue', 'arrowDOWN');
+			animation.addByPrefix('purple', 'arrowLEFT');
+			animation.addByPrefix('red', 'arrowRIGHT');
+			
+			antialiasing = PlayerPrefs.antialiasing;
+			setGraphicSize(Std.int(width * 0.7));
+
 			switch (noteData) {
 				case 0:
 					animation.addByPrefix('static', 'arrowLEFT');
@@ -352,59 +368,14 @@ class StaticArrow extends FlxSprite
 					animation.addByPrefix('pressed', 'right press', 24, false);
 					animation.addByPrefix('confirm', 'right confirm', 24, false);
 			}
-
-			setGraphicSize(Std.int(width * 0.7));
-			antialiasing = PlayerPrefs.antialiasing;
-			updateHitbox();
-			scrollFactor.set();
-		}
-	}
-
-	public function reloadSkin(texture:String = '', isPixel:Bool = false) {
-		var noteSkin:String = texture;
-		var noteAnim:String = '';
-		if (noteSkin == null) noteSkin = '';
-
-		if (animation.curAnim != null) {
-			noteAnim = animation.curAnim.name;
 		}
 
-		if (texture.length < 1) {
-			if (PlayState.SONG != null)
-				noteSkin = PlayState.SONG.arrowTexture;
-
-			if (noteSkin == null || noteSkin.length < 1) {
-				noteSkin = 'NOTE_assets';
-			}
-		}
-
-		if (isPixel) {
-			var imgWidth:Int = Tools.getImagePixelWidth(texture);
-			var imgHeight:Int = Tools.getImagePixelHeight(texture);
-
-			loadGraphic(Paths.image(texture), true, imgWidth, imgHeight);
-
-			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-			addArrowAnim(true);
-			antialiasing = false;
-		}
-		else  {
-			frames = Paths.getSparrowAtlas(noteSkin);
-			addArrowAnim(false);
-			antialiasing = PlayerPrefs.antialiasing;
-		}
-
-		if (this == null) {
-			frames = Paths.getSparrowAtlas('NOTE_assets');
-			addArrowAnim(false);
-			antialiasing = PlayerPrefs.antialiasing;
-		}
-		 
-		playAnim('static');
-			
 		updateHitbox();
-	}
 
+		if (lastAnim != null) {
+			animation.play(lastAnim, true, false, lastFrame);
+		}
+	}
 
 	public function addOffset(animName:String, x:Float = 0, y:Float = 0){
 		animOffsets[animName] = [x, y];
@@ -416,7 +387,7 @@ class Strum extends FlxTypedGroup<FlxBasic>
 	public var strums:FlxTypedGroup<StaticArrow>;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	public var strumCharacter:Character = null;
-	public var playstateInstance:PlayState;
+	public var instance:PlayState;
 	public var numbOfArrows:Int = 0;
 	public var playerNumb:Int = 2;
 	public var downScroll:Bool = false;
@@ -426,21 +397,17 @@ class Strum extends FlxTypedGroup<FlxBasic>
 	public var style:String = 'normal';
 	public var singDirs:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 
-	public function new(x:Float, ?instance:PlayState, ?noteSkin:String = 'NOTE_assets', ?strumChar:Character, ?downscroll:Bool = false, ?strumID:Int = 0)
+	public function new(x:Float, ?instance:PlayState, ?noteSkin:String = 'NOTE_assets', ?strumChar:Character, ?strumID:Int = 0)
 	{
 		super();
 
-		if (instance != null)
-			playstateInstance = instance;
-		else
-			playstateInstance = new PlayState(); //To prevent crash
+		if (instance != null) this.instance = instance; else this.instance = new PlayState();
 
 		strums = new FlxTypedGroup<StaticArrow>();
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
-		playerNumb = playstateInstance.numbOfStrums;
+		playerNumb = instance.numbOfStrums;
 		changeCharacter(strumChar);
 		this.strumID = strumID;
-		downScroll = downscroll;
 
 		if (strumCharacter == null) {
 			switch (strumID) {
@@ -486,48 +453,23 @@ class Strum extends FlxTypedGroup<FlxBasic>
 					strumCharacter.dance();
 			}
 			else
-				if (strumCharacter.animation.curAnim.name == strumCharacter.idleDance &&
-					curBeat % charIdle == 0)
+				if (strumCharacter.animation.curAnim.name == strumCharacter.idleDance && curBeat % charIdle == 0)
 					strumCharacter.dance();
 		}
 	}
 
 	public function addArrowPixel(noteData:Int, ?noteSkin:String = 'pixel_arrows') {
-		var arrowValue:Int = playerNumb - 1;
-		var arrowY:Float = 50;
 
-		if (downScroll)
-			arrowY = FlxG.height - 150;
-
-		var staticArrow:StaticArrow = new StaticArrow(0, arrowY, noteData);
-		staticArrow.isPixelStrum = true;
+		var staticArrow:StaticArrow = new StaticArrow(0, 0, noteData);
+		staticArrow.isPixel = true;
 		staticArrow.texture = noteSkin;
 		staticArrow.ID = noteData;
-		staticArrow.x += Note.swagWidth * noteData * (2 / (arrowValue * 2));
 		strums.add(staticArrow);
 		staticArrow.isPlayer = (strumID == PlayState.playerLane);
 		staticArrow.originAngle = 0;
-		staticArrow.alphaTo = 1;
 		staticArrow.playAnim('static');
 
-		switch (playerNumb) {
-			case 3:
-				staticArrow.x += 50;
-				if (strumID > 0)
-					staticArrow.x += 400 * strumID;
-				staticArrow.x += Note.swagWidth * (noteData / 3);
-			case 4:
-				staticArrow.x += 15;
-				staticArrow.x += 310 * strumID;
-				staticArrow.x += Note.swagWidth * (noteData / 3);
-			case 2:
-				switch (strumID) {
-					case 1:
-						staticArrow.x += FlxG.width / 1.75;
-					default:
-						staticArrow.x += 100;
-				}
-		}
+		arrowPosition(staticArrow);
 
 		staticArrow.initX = staticArrow.x;
 		staticArrow.initY = staticArrow.y;
@@ -535,52 +477,65 @@ class Strum extends FlxTypedGroup<FlxBasic>
 	}
 
 	public function addArrow(noteData:Int, ?noteSkin:String = 'NOTE_assets'){
-		var arrowValue:Int = playerNumb - 1;
-		var arrowY:Float = 50;
-
-		if (downScroll)
-			arrowY = FlxG.height - 150;
-
-		var staticArrow:StaticArrow = new StaticArrow(0, arrowY, noteData);
+		var staticArrow:StaticArrow = new StaticArrow(0, 0, noteData, strumID);
 		staticArrow.texture = noteSkin;
 		staticArrow.ID = noteData;
-		staticArrow.x += Note.swagWidth * noteData * (2 / (arrowValue * 2));
 		strums.add(staticArrow);
 		staticArrow.isPlayer = (strumID == PlayState.playerLane);
 		staticArrow.originAngle = 0;
-		staticArrow.alphaTo = 1;
 		staticArrow.playAnim('static');
 
-		switch (playerNumb) {
-			case 3:
-				staticArrow.x += 50;
-				if (strumID > 0)
-					staticArrow.x += 400 * strumID;
-				staticArrow.x += Note.swagWidth * (noteData / 3);
-			case 4:
-				staticArrow.x += 15;
-				staticArrow.x += 310 * strumID;
-				staticArrow.x += Note.swagWidth * (noteData / 3);
-			case 2:
-				switch (strumID) {
-					case 1:
-						staticArrow.x += FlxG.width / 1.75;
-					default:
-						staticArrow.x += 100;
-				}
-		}
-
-		if (PlayerPrefs.middlescroll) {
-			staticArrow.x = -250;
-
-			if (strumID == PlayState.playerLane)
-				staticArrow.x = 250 + (Note.swagWidth * noteData);
-		}
+		arrowPosition(staticArrow);
 
 		staticArrow.initX = staticArrow.x;
 		staticArrow.initY = staticArrow.y;
 		numbOfArrows++;
 	}
+
+	public function setmiddlescroll(val:Bool = false, instant:Bool = true) {
+
+		var arrowX:Float = ((strumID == PlayState.playerLane) ? 400 : -500);
+
+		if (!val) {
+			for (noteData in 0...strums.members.length)
+				arrowPosition(strums.members[noteData]);
+
+			return;
+		}
+	
+		if (instant) {
+			for (noteData in 0...strums.members.length) {
+				var arrow:StaticArrow = strums.members[noteData];
+
+				arrow.x = arrowX + (Note.swagWidth * noteData);
+			}
+
+			return;
+		}
+
+		for (noteData in 0...strums.members.length) {
+			var arrow:StaticArrow = strums.members[noteData];
+
+			var arrowTween:FlxTween = FlxTween.tween(arrow, {x : arrowX + (Note.swagWidth * noteData)}, 2);
+		}
+
+		return;
+	}
+
+	public function arrowPosition(strumArrow:StaticArrow)	{
+		if (strumArrow == null) return;
+	
+		var arrowValue:Int = playerNumb - 1;
+		var noteData:Int = strumArrow.noteData;
+		var arrowX:Float = Note.swagWidth * noteData;
+		arrowX += 50;
+		arrowX += ((FlxG.width / instance.numbOfStrums) * strumID);
+
+		strumArrow.x = arrowX;
+	}
+
+	public function setdownscroll(val:Bool = false)
+		return for (arrow in strums.members) arrow.isDownscroll = val;
 
 	public function getArrowByNumb(numb:Int = 0):StaticArrow {
 		var returnArrow:StaticArrow = strums.members[0];
@@ -610,21 +565,18 @@ class Strum extends FlxTypedGroup<FlxBasic>
 		return returnArrow;
 	}
 
-	public function playCharAnim(noteData:Int = 0, altAnim:Bool = false, canAnim:Bool = true, isOpponent:Bool = true, ?doGhost:Bool = false){
+	public function playCharAnim(noteData:Int = 0, altAnim:Bool = false, canAnim:Bool = true, isOpponent:Bool = true){
 		if (strumCharacter != null && strumCharacter.canSing){
-			if (canAnim && !doGhost) {
+			if (canAnim) {
 				if (altAnim){
 					strumCharacter.playAnim(singDirs[noteData] + '-alt', true);
 				}
 				else
 					strumCharacter.playAnim(singDirs[noteData], true);
 
-				if (PlayState.playerLane != strumID)
+				if (strumID != PlayState.playerLane)
 					strumCharacter.holdTimer = 0;
 			}
-
-			if (doGhost && playstateInstance != null) 
-				playstateInstance.doGhost(strumCharacter, singDirs[noteData], isOpponent);
 		}
 	}
 

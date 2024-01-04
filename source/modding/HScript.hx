@@ -29,6 +29,7 @@ import states.*;
 import substates.*;
 import gameObjects.*;
 import gameObjects.notes.*;
+import shaders.FlxRuntimeShader as FlxRunShader;
 
 import mappedEvents.Event;
 #if sys
@@ -47,6 +48,9 @@ using StringTools;
 
 class HScript
 {
+	public static var FUNCTION_CONTINUE = 0;
+	public static var FUNCTION_STOP = 1;
+
 	#if ALLOW_HSCRIPT
 	public var parser:Parser;
 	public var interp:Interp;
@@ -79,45 +83,44 @@ class HScript
 
 		interp = new Interp();
 
-		interp.variables.set("Sys", Sys);
-		interp.variables.set("Std", Std);
-		interp.variables.set("FlxMath", FlxMath);
-		interp.variables.set("Conductor", Conductor);
-		interp.variables.set("MusicBeatState", MusicBeatState);
-		interp.variables.set("PlayState", PlayState);
-		interp.variables.set("Note", Note);
-		interp.variables.set("Paths", Paths);
-		interp.variables.set("Character", Character);
-		interp.variables.set("Boyfriend", Boyfriend);
-		interp.variables.set("StringTools", StringTools);
-		interp.variables.set("FlxG", FlxG);
-		interp.variables.set("FlxTimer", FlxTimer);
-		interp.variables.set("FlxTween", FlxTween);
-		interp.variables.set("FlxEase", FlxEase);
-		interp.variables.set("FlxSprite", FlxSprite);
-		interp.variables.set("FlxText", FlxText);
-		interp.variables.set("FlxTypedGroup", FlxTypedGroup);
-		interp.variables.set("FlxGroup", FlxGroup);
-		interp.variables.set("FlxTypedSpriteGroup", FlxTypedSpriteGroup);
-		interp.variables.set("FlxCamera", FlxCamera);
-		interp.variables.set("FlxPoint", FlxPoint);
-		interp.variables.set("FlxAxes", flixel.util.FlxAxes);
-		interp.variables.set("FlxAnimate", flxanimate.FlxAnimate);
-		interp.variables.set("Song", Song);
-		interp.variables.set("Strum", Strum);
-		interp.variables.set("StaticArrow", Strum.StaticArrow);
-		interp.variables.set("PlayerPrefs", PlayerPrefs);
-		interp.variables.set("FlxBackdrop", FlxBackdrop);
-		interp.variables.set("Xml", Xml);
-		interp.variables.set("Reflect", Reflect);
-		interp.variables.set("Math", Math);
-		interp.variables.set("BGSprite", BGSprite);
-		interp.variables.set("Array", Array);
-		interp.variables.set("HScript", HScript);
-		interp.variables.set("Parser", Parser);
-		interp.variables.set("Main", Main);
-		interp.variables.set("playSound", FlxG.sound.play);
-		interp.variables.set("trace", traceText);
+		set("Sys", Sys);
+		set("Std", Std);
+		set("FlxMath", FlxMath);
+		set("Conductor", Conductor);
+		set("MusicBeatState", MusicBeatState);
+		set("PlayState", PlayState);
+		set("Note", Note);
+		set("Paths", Paths);
+		set("Character", Character);
+		set("Boyfriend", Boyfriend);
+		set("StringTools", StringTools);
+		set("FlxG", FlxG);
+		set("FlxTimer", FlxTimer);
+		set("FlxTween", FlxTween);
+		set("FlxEase", FlxEase);
+		set("FlxSprite", FlxSprite);
+		set("FlxText", FlxText);
+		set("FlxTypedGroup", FlxTypedGroup);
+		set("FlxGroup", FlxGroup);
+		set("FlxTypedSpriteGroup", FlxTypedSpriteGroup);
+		set("FlxCamera", FlxCamera);
+		set("FlxAnimate", flxanimate.FlxAnimate);
+		set("Song", Song);
+		set("Strum", Strum);
+		set("StaticArrow", Strum.StaticArrow);
+		set("PlayerPrefs", PlayerPrefs);
+		set("FlxBackdrop", FlxBackdrop);
+		set("Xml", Xml);
+		set("Reflect", Reflect);
+		set("Math", Math);
+		set("BGSprite", BGSprite);
+		set("Array", Array);
+		set("HScript", HScript);
+		set("Parser", Parser);
+		set("Main", Main);
+		set("playSound", FlxG.sound.play);
+		set("getOption", PlayerPrefs.getOptionValue);
+		set("trace", traceText);
 
 		setInstance();
 
@@ -128,13 +131,13 @@ class HScript
 
 		#if desktop
 		interp.variables.set("Event", Event);
-		interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
+		interp.variables.set('FlxRuntimeShader', FlxRunShader);
 		interp.variables.set("ShaderFilter", ShaderFilter);
 		#end
 
 		interp.variables.set("addLibrary", addLibrary);
 		interp.variables.set("exists", exists);
-		interp.variables.set("exit", exit);
+		interp.variables.set("close", close);
 		interp.variables.set("get", get);
 		interp.variables.set("set", set);
 
@@ -146,11 +149,11 @@ class HScript
 			}
 			catch(e:Dynamic) {
 				trace(e);
-				exit();
+				close();
 			}
 		}
 		else
-			exit();
+			close();
 
 		if (exists('onCreate') && isAlive)
 			get('onCreate')();
@@ -173,8 +176,12 @@ class HScript
 		#end
 	}
 
-	public function exit():Dynamic
+	public function close():Dynamic {
+		#if ALLOW_HSCRIPT
+		interp = null;
+		#end
 		return this.isAlive = false;
+	}
 
 	#if ALLOW_HSCRIPT
 	public function get(field:String):Dynamic
@@ -210,9 +217,7 @@ class HScript
 			}
 		}
 	}
-	#end
 
-	#if ALLOW_HSCRIPT
 	public function exists(field:String):Bool
 		return (isAlive ? interp.variables.exists(field) : false);
 	#end
@@ -220,26 +225,10 @@ class HScript
 	public function traceText(text:Dynamic)
 		return trace(text);
 
-	public function getAbstract(className:String, libPackage:String, variable:String):Dynamic {
-		if (className == null || className == '') return null;
+	public function call(func:String, args:Array<Dynamic>):Dynamic {
+		if (func == null || !exists(func) || !isAlive) return null;
 
-		var packageStr:String = '';
-		if (libPackage.length > 0) {
-			packageStr = '$libPackage.';
-		}
-
-		var classVariable:Dynamic = null;
-
-		try {
-			 classVariable = Reflect.getProperty(Type.getClass(packageStr + className), variable);
-		}
-		catch(e:Dynamic) {
-			trace(e);
-
-			classVariable = null;
-		}
-
-		return classVariable;
+		return Reflect.callMethod(null, get(func), args);
 	}
 
 	public function blendFromString(blend:String):BlendMode {
@@ -265,8 +254,7 @@ class HScript
 	public function setNameFromPath(text:String = '') {
 		if (text != null && text != '') {
 			var splitPath:Array<String> = text.split('/');
-			var killMeNow:String = StringTools.replace(splitPath[splitPath.length - 1], ".hx", "");
-			moduleID = killMeNow;
+			moduleID = splitPath[splitPath.length - 1];
 		}
 		else 
 			moduleID = 'Unknown HScript';

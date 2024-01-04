@@ -16,6 +16,9 @@ import helpers.*;
 import gameObjects.*;
 import data.*;
 import states.*;
+import options.PlayStateSettings;
+
+import gameObjects.notes.Strum.StaticArrow;
 
 using StringTools;
 
@@ -34,7 +37,6 @@ class Note extends FlxSprite
 	public var strumID:Int = 0;
 	public var sustainHit:Bool = false;
 	public var notePos:Int = 0;
-	public var canGhost:Bool = false;
 	public var noteHit:Bool = true;
 
 	public var sustainLength:Float = 0;
@@ -51,6 +53,7 @@ class Note extends FlxSprite
 	public static var BLUE_NOTE:Int = 1;
 	public static var RED_NOTE:Int = 3;
 
+	public var parentNote:Note = null;
 	public var susNotes:Array<Note> = [];
 	public var stopHit:Bool = false;
 	public var ignoreSus(default, set):Bool = false;
@@ -164,16 +167,18 @@ class Note extends FlxSprite
 
 		if (isPixel) {
 			if (isSustainNote) {
-				var imgWidth:Int = Tools.getImagePixelWidth(texture + 'ENDS');
-				var imgHeight:Int = Tools.getImagePixelHeight(texture + 'ENDS') * 2;
+				loadGraphic(Paths.image('pixelUI/' + texture + 'ENDS'));
+				var width = this.width / 4;
+				var height = this.height / 5;
 
-				loadGraphic(Paths.image(texture + 'ENDS'), true, imgWidth, imgHeight);
+				loadGraphic(Paths.image('pixelUI/' + texture + 'ENDS'), true, Math.floor(width), Math.floor(height));
 			}
 			else {
-				var imgWidth:Int = Tools.getImagePixelWidth(texture);
-				var imgHeight:Int = Tools.getImagePixelHeight(texture);
+				loadGraphic(Paths.image('pixelUI/' + texture));
+				var width = this.width / 4;
+				var height = this.height / 5;
 
-				loadGraphic(Paths.image(texture), true, imgWidth, imgHeight);
+				loadGraphic(Paths.image('pixelUI/' + texture), true, Math.floor(width), Math.floor(height));
 			}
 
 			loadAnimations(true);
@@ -198,14 +203,14 @@ class Note extends FlxSprite
 
 		setGraphicSize(graphicsSize);
 		 
-		doAnim();
+		playAnim();
 		updateHitbox();
 	}
 
 	public function charterNote() {
 		frames = Paths.getSparrowAtlas("NOTE_assets", "shared");
 		loadAnimations(false);
-		doAnim();
+		playAnim();
 
 		setGraphicSize(Std.int(width * 0.7));
 		updateHitbox();
@@ -223,9 +228,9 @@ class Note extends FlxSprite
 				setGraphicSize(Std.int(width * 0.7));
 				updateHitbox();
 				antialiasing = PlayerPrefs.antialiasing;
-		}
 
-		doAnim();
+				playAnim();
+		}
 	}
 
 	inline public function set_ignoreSus(value:Bool):Bool {
@@ -233,6 +238,8 @@ class Note extends FlxSprite
 			sus.ignoreNote = value;
 			sus.stopHit = value;
 			sus.noAnim = true;
+
+			alpha = (value ? 0.3 : 0.6);
 		}
 
 		return value;
@@ -277,7 +284,7 @@ class Note extends FlxSprite
 		}
 	}
 
-	public function doAnim()
+	public function playAnim()
 	{
 		switch (noteData) {
 			case 0:
@@ -290,59 +297,63 @@ class Note extends FlxSprite
 				animation.play('redScroll');
 		}
 
-		doSustainThing();
-	}
-
-	public function doSustainThing() {
 		if (isSustainNote) {
-			if (prevNote != null) {
-				if (PlayerPrefs.downscroll)
-					angle = 180;
+			switch (noteData)
+			{
+				case 2:
+					animation.play('greenholdend');
+				case 3:
+					animation.play('redholdend');
+				case 1:
+					animation.play('blueholdend');
+				case 0:
+					animation.play('purpleholdend');
+				default:
+					animation.play('purpleholdend');
+			}
 
-				noteScore * 0.2;
-				alpha = 0.6;
-
-				if (PlayerPrefs.middlescroll && !isPlayer && !inCharter)
-					alpha = 0;
-
-				switch (noteData)
+			if (prevNote != null && prevNote.isSustainNote) {
+				switch (prevNote.noteData)
 				{
-					case 2:
-						animation.play('greenholdend');
-					case 3:
-						animation.play('redholdend');
-					case 1:
-						animation.play('blueholdend');
 					case 0:
-						animation.play('purpleholdend');
-				}
-
-				updateHitbox();
-
-				if (prevNote.isSustainNote)
-				{
-					switch (prevNote.noteData)
-					{
-						case 0:
-							prevNote.animation.play('purplehold');
-						case 1:
-							prevNote.animation.play('bluehold');
-						case 2:
-							prevNote.animation.play('greenhold');
-						case 3:
-							prevNote.animation.play('redhold');
-					}
-
-					prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed;
-					prevNote.updateHitbox();
+						prevNote.animation.play('purplehold');
+					case 1:
+						prevNote.animation.play('bluehold');
+					case 2:
+						prevNote.animation.play('greenhold');
+					case 3:
+						prevNote.animation.play('redhold');
 				}
 			}
+		}
+
+		scaleSustain();
+	}
+
+	public function scaleSustain() {
+		if (prevNote != null && isSustainNote) {
+			if (PlayerPrefs.downscroll)
+				angle = 180;
+
+			noteScore * 0.2;
+			alpha = 0.6;
+
+			if (PlayerPrefs.middlescroll && !isPlayer && !inCharter)
+				alpha = 0;
+
+			updateHitbox();
+
+			if (prevNote.isSustainNote) {
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayStateSettings.scroll_speed;
+				prevNote.updateHitbox();
+			}
+
 		}
 	}
 
 	public function resizeScale(speed:Float) {
 		if (isSustainNote && (animation.curAnim != null && !animation.curAnim.name.endsWith('end'))) {
-			scale.y *= speed / PlayState.instance.songSpeed;
+			scale.y *= (speed / PlayStateSettings.scroll_speed);
 			updateHitbox();
 		}
 	}
@@ -381,5 +392,26 @@ class Note extends FlxSprite
 		if (tooLate)
 			if (alpha > 0.3)
 				alpha = 0.3;
+	}
+
+	public function followStrum(strumArrow:StaticArrow, speed:Float = 1) {
+		var strumX:Float = strumArrow.x;
+		var strumY:Float = strumArrow.y;
+		var strumAngle:Float = strumArrow.angle;
+		var strumAlpha:Float = strumArrow.alpha;
+		var downscroll:Bool = PlayStateSettings.downscroll;
+		var susOffset:Float = (isSustainNote ? 37 : 0);
+
+		var distance = (0.45 * (Conductor.songPosition - strumTime) * speed);
+
+		if (downscroll) distance *= -1;
+
+		if (!modifiedNote) {
+			angle = strumAngle;
+			alpha = strumAlpha;
+			x = strumX + susOffset;
+		}
+
+		y = strumY - distance;		
 	}
 }
